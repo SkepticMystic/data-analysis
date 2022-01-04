@@ -1,4 +1,6 @@
+import { Notice, Plugin } from "obsidian";
 import { DataviewApi, Link } from "obsidian-dataview";
+import { AnalysisModal } from "./AnalysisModal";
 import { DEFAULT_SETTINGS } from "./const";
 import { Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
@@ -36,6 +38,11 @@ export default class DataAnalysisPlugin extends Plugin {
 			name: "Refresh Index",
 			callback: async () =>
 				await this.refreshIndex(this.app.plugins.plugins.dataview?.api),
+		});
+		this.addCommand({
+			id: "analysis-view",
+			name: "Open Analysis Modal",
+			callback: async () => new AnalysisModal(this.app, this).open(),
 		});
 	}
 
