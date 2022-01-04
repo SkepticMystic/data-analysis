@@ -5,8 +5,10 @@ import { SettingTab } from "./SettingTab";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
+	index: {} = {};
 
 	async onload() {
+		console.log("Loading data-analysis plugin");
 		await this.loadSettings();
 
 		this.addSettingTab(new SettingTab(this.app, this));
@@ -28,6 +30,13 @@ export default class DataAnalysisPlugin extends Plugin {
 				"Dataview must be enabled for the Data Analysis plugin to work"
 			);
 		}
+
+		this.addCommand({
+			id: "refresh-index",
+			name: "Refresh Index",
+			callback: async () =>
+				await this.refreshIndex(this.app.plugins.plugins.dataview?.api),
+		});
 	}
 
 	onunload() {}
@@ -48,10 +57,28 @@ export default class DataAnalysisPlugin extends Plugin {
 		}
 		return unproxied;
 	}
+
+	refreshIndex(dvApi: DataviewApi) {
+		const notice = new Notice("Index refreshing...");
+		if (!dvApi) {
+			notice.setMessage("Dataview must be enabled");
+			return;
+		}
+		const { fieldsToCheck } = this.settings;
+
+		const pages: { [field: string]: any }[] = dvApi.pages().values;
+		pages.forEach((page) => {
 			fieldsToCheck.forEach((field) => {
 				if (page[field]) {
 					page[field] = this.unproxy(page[field]);
 				}
+			});
+		});
+		console.log(pages);
+		this.index = pages;
+		notice.setMessage("Index refreshed ✅");
+	}
+
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
