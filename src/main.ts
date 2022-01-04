@@ -48,6 +48,10 @@ export default class DataAnalysisPlugin extends Plugin {
 		}
 		return unproxied;
 	}
+			fieldsToCheck.forEach((field) => {
+				if (page[field]) {
+					page[field] = this.unproxy(page[field]);
+				}
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
