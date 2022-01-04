@@ -15,6 +15,8 @@
 	let selected: string[] = [];
 
 	let colour = "#15a252";
+	let startDate = index.minDate;
+	let endDate = index.maxDate;
 
 	function isValidSelection(selected: string[]) {
 		return selected.length === 2;
@@ -26,7 +28,7 @@
 	}
 
 	function refreshInnerData(selected: string[]): Datum2d[] {
-		return index
+		return index.data
 			.map((page) => {
 				return {
 					x: page[selected[0]]?.[0] as number,
@@ -103,6 +105,6 @@
 </script>
 
 <Checkboxes options={allFields} {plugin} bind:selected />
-<ChartOptions bind:colour />
+<ChartOptions bind:colour bind:startDate bind:endDate />
 <Scatter {data} options={chartOptions} />
 <div>Correlation: {correlation?.toFixed(4) ?? "Select 2 fields"}</div>

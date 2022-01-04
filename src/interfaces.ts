@@ -2,6 +2,7 @@ import { Link } from "obsidian-dataview";
 
 export interface Settings {
 	fieldsToCheck: string[];
+	dateFormat: string;
 }
 
 export type DataType = number | string | Date | Link;

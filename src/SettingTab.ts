@@ -1,4 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
+import { DEFAULT_SETTINGS } from "./const";
 import DataAnalysisPlugin from "./main";
 import { splitAndTrim } from "./utils";
 
@@ -28,6 +29,19 @@ export class SettingTab extends PluginSettingTab {
 						plugin.app.plugins.plugins.dataview?.api
 					);
 				};
+			});
+
+		new Setting(containerEl)
+			.setName("Date Format")
+			.setDesc("The date format you use in your vault.")
+			.addMomentFormat((format) => {
+				format
+					.setDefaultFormat(DEFAULT_SETTINGS.dateFormat)
+					.setValue(settings.dateFormat)
+					.onChange(async (value) => {
+						settings.dateFormat = value;
+						await plugin.saveSettings();
+					});
 			});
 	}
 }

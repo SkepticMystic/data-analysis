@@ -42,6 +42,7 @@
 	"dependencies": {
 		"chartjs": "^0.3.24",
 		"esbuild-svelte": "^0.6.0",
+		"luxon": "^2.3.0",
 		"svelte-chartjs": "^1.1.2",
 		"svelte-preprocess": "^4.10.1"
 	}

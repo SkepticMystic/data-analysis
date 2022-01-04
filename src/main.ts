@@ -1,13 +1,19 @@
+import { DateTime } from "luxon";
 import { Notice, Plugin } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
 import { AnalysisModal } from "./AnalysisModal";
 import { DEFAULT_SETTINGS } from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
+import { splitAndTrim } from "./utils";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
-	index: { [field: string]: DataType[] }[] = [];
+	index: {
+		data: { [field: string]: DataType }[];
+		minDate: DateTime;
+		maxDate: DateTime;
+	} = { data: undefined, minDate: undefined, maxDate: undefined };
 
 	async onload() {
 		console.log("Loading data-analysis plugin");
@@ -18,12 +24,11 @@ export default class DataAnalysisPlugin extends Plugin {
 		if (this.app.plugins.enabledPlugins.has("dataview")) {
 			console.log("DataView plugin is enabled");
 			const api = this.app.plugins.plugins.dataview?.api;
-			if (api) {
-				console.log(this.refreshIndex(api));
-			} else {
+			if (api) this.refreshIndex(api);
+			else {
 				this.registerEvent(
 					this.app.metadataCache.on("dataview:api-ready", (api) => {
-						console.log(this.refreshIndex(api));
+						this.refreshIndex(api);
 					})
 				);
 			}
@@ -74,15 +79,23 @@ export default class DataAnalysisPlugin extends Plugin {
 		const { fieldsToCheck } = this.settings;
 
 		const pages: { [field: string]: any }[] = dvApi.pages().values;
+		const dates: DateTime[] = [];
 		pages.forEach((page) => {
+			const potentialDate = DateTime.fromISO(page.file.name);
+			if (potentialDate.isValid) dates.push(potentialDate);
+
 			fieldsToCheck.forEach((field) => {
 				if (page[field]) {
 					page[field] = this.unproxy(page[field]);
 				}
 			});
 		});
-		console.log(pages);
-		this.index = pages;
+		this.index = {
+			data: pages,
+			minDate: DateTime.min(...dates),
+			maxDate: DateTime.max(...dates),
+		};
+		console.log(this.index);
 		notice.setMessage("Index refreshed ✅");
 	}
 
