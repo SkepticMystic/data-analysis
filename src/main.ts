@@ -53,6 +53,11 @@ export default class DataAnalysisPlugin extends Plugin {
 			name: "Open Analysis Modal",
 			callback: async () => new ChartModal(this.app, this).open(),
 		});
+		this.addCommand({
+			id: "stats-view",
+			name: "Open Stats Modal",
+			callback: async () => new StatsModal(this.app, this).open(),
+		});
 	}
 
 	onunload() {}
