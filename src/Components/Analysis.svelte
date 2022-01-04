@@ -61,57 +61,45 @@
 		};
 	}
 
-
-	let data = refreshData(colour, innerData);
-	$: data = refreshData(colour, innerData);
-
-	let chartOptions = {
-		title: {
-			display: true,
-			text: "Scatter Chart - Logarithmic X-Axis",
-		},
-		scales: {
-			xAxes: [
-				{
-					label: "Test",
+	function refreshChartOptions(selected: string[]) {
+		return {
+			title: {
+				display: true,
+				text: "Scatter Chart - Logarithmic X-Axis",
+			},
+			scales: {
+				xAxes: {
+					title: {
+						display: isValidSelection(selected),
+						text: selected[0] ?? "",
+					},
 					type: "linear",
 					position: "bottom",
-					ticks: {
-						userCallback: function (tick) {
-							var remain =
-								tick /
-								Math.pow(
-									10,
-									Math.floor(Chart.helpers.log10(tick))
-								);
-							if (remain === 1 || remain === 2 || remain === 5) {
-								return tick.toString() + "Hz";
-							}
-							return "";
-						},
-					},
 					scaleLabel: {
 						labelString: "Frequency",
 						display: true,
 					},
 				},
-			],
-			yAxes: [
-				{
+
+				yAxes: {
 					type: "linear",
-					ticks: {
-						userCallback: function (tick) {
-							return tick.toString() + "dB";
-						},
-					},
 					scaleLabel: {
 						labelString: "Voltage",
 						display: true,
 					},
+					title: {
+						display: isValidSelection(selected),
+						text: selected[1] ?? "",
+					},
 				},
-			],
-		},
-	};
+			},
+		};
+	}
+
+	$: innerData = refreshInnerData(selected);
+	$: correlation = refreshCorrelation(selected, innerData);
+	$: data = refreshData(colour, innerData);
+	$: chartOptions = refreshChartOptions(selected);
 </script>
 
 <Checkboxes options={allFields} {plugin} bind:selected />
