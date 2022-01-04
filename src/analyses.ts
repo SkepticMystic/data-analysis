@@ -4,7 +4,7 @@
  * @param {arraytype} ys - the array of y values
  * @returns The correlation coefficient.
  */
-export function pearsonCorrelation(xs: number[], ys: number[]) {
+export function getPearsonCorrelation(xs: number[], ys: number[]) {
 	const n = xs.length;
 	if (n !== ys.length) throw new Error("Arrays must be the same length");
 
@@ -29,4 +29,74 @@ export function pearsonCorrelation(xs: number[], ys: number[]) {
 		Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y));
 
 	return corr;
+}
+
+/**
+ * Checks if all values in `xs` are numbers
+ * @param {arraytype} xs - number[]
+ * @returns {boolean}
+ */
+export function isQuant(xs: number[]): boolean {
+	return xs.length && xs.every((x) => typeof x === "number");
+}
+
+/**
+ * Compute the mean of a list of numbers.
+ * @param {arraytype} xs - number[]
+ * @returns The mean of the numbers in the array.
+ */
+export function getMean(xs: number[]) {
+	if (!isQuant(xs)) return null;
+	return xs.reduce((a, b) => a + b) / xs.length;
+}
+
+/**
+ * Given a list of numbers, return the median of the list.
+ * @param {arraytype} xs - the array of numbers to be sorted
+ * @returns The median of the array.
+ */
+export function getMedian(xs: number[]) {
+	if (!isQuant(xs)) return null;
+	const sorted = xs.slice().sort((a, b) => a - b);
+	const mid = Math.floor(sorted.length / 2);
+	return sorted[mid];
+}
+
+/**
+ * Given a list of items, return the most common item.
+ * @param {arraytype} xs - The array of values to count.
+ * @returns {string[]} The mode(s) of the array.
+ */
+export function getMode(
+	xs: (string | number | string[] | number[])[]
+): string[] {
+	const flattened = xs.flat();
+	const counts: { [item: string | number]: number } = {};
+	flattened.forEach((x) => {
+		if (counts[x]) counts[x] = counts[x] + 1;
+		else counts[x] = 1;
+	});
+	const max = Math.max(...Object.values(counts));
+	return Object.keys(counts).filter((x) => counts[x] === max);
+}
+
+/**
+ * Calculate the variance of a set of numbers.
+ * @param {arraytype} xs - the array of numbers to be analyzed
+ * @returns The variance of the array.
+ */
+export function getVariance(xs: number[]) {
+	if (!isQuant(xs)) return null;
+	const mean_x = getMean(xs);
+	return xs.reduce((a, b) => a + Math.pow(b - mean_x, 2), 0) / xs.length;
+}
+
+/**
+ * Compute the standard deviation of a set of numbers.
+ * @param {arraytype} xs - the array of numbers to be analyzed
+ * @returns The standard deviation of the array.
+ */
+export function getStdDev(xs: number[]) {
+	if (!isQuant(xs)) return null;
+	return Math.sqrt(getVariance(xs));
 }
