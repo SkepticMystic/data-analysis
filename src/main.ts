@@ -1,13 +1,13 @@
 import { Notice, Plugin } from "obsidian";
-import { DataviewApi, Link } from "obsidian-dataview";
+import { DataviewApi } from "obsidian-dataview";
 import { AnalysisModal } from "./AnalysisModal";
 import { DEFAULT_SETTINGS } from "./const";
-import { Settings } from "./interfaces";
+import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
-	index: {} = {};
+	index: { [field: string]: DataType[] }[] = [];
 
 	async onload() {
 		console.log("Loading data-analysis plugin");
@@ -48,7 +48,7 @@ export default class DataAnalysisPlugin extends Plugin {
 
 	onunload() {}
 
-	unproxy(item: any): (number | string | Date | Link)[] {
+	unproxy(item: any): DataType[] {
 		const unproxied = [];
 
 		const queue = [item];
