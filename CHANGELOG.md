@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.5](https://github.com/SkepticMystic/data-analysis/compare/0.0.4...0.0.5) (2022-01-04)
+
+
+### Documentation
+
+* :memo: Update Readme ([5d90f14](https://github.com/SkepticMystic/data-analysis/commit/5d90f146e02f26fa92c3d1fc757b5a1ec0a4cfd7))
+
 ### [0.0.4](https://github.com/SkepticMystic/data-analysis/compare/0.0.3...0.0.4) (2022-01-04)
 
 
