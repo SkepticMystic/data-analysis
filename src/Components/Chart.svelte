@@ -3,7 +3,7 @@
 	import Checkboxes from "./Checkboxes.svelte";
 	import ChartOptions from "./ChartOptions.svelte";
 	import Scatter from "svelte-chartjs/src/Scatter.svelte";
-	import { pearsonCorrelation } from "src/analyses";
+	import { getPearsonCorrelation } from "src/analyses";
 	import { DateTime } from "obsidian-dataview";
 
 	export let modal: ChartModal;
@@ -50,8 +50,8 @@
 		const innerData = fileRange
 			.map((page) => {
 				return {
-					x: page[selected[0]]?.[0] as number,
-					y: page[selected[1]]?.[0] as number,
+					x: page[selected[0]] as number,
+					y: page[selected[1]] as number,
 					name: page.file.name,
 				};
 			})
@@ -63,7 +63,7 @@
 
 	function refreshCorrelation(selected: string[], innerData: Datum2d[]) {
 		return isValidSelection(selected)
-			? pearsonCorrelation(
+			? getPearsonCorrelation(
 					innerData.map((p) => p.x),
 					innerData.map((p) => p.y)
 			  )

@@ -1,10 +1,11 @@
 import { DateTime } from "luxon";
-import { Notice, Plugin, TFile } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
 import { DEFAULT_SETTINGS } from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
+import { StatsModal } from "./StatsModal";
 import { splitAndTrim } from "./utils";
 
 export default class DataAnalysisPlugin extends Plugin {
@@ -49,8 +50,8 @@ export default class DataAnalysisPlugin extends Plugin {
 				await this.refreshIndex(this.app.plugins.plugins.dataview?.api),
 		});
 		this.addCommand({
-			id: "analysis-view",
-			name: "Open Analysis Modal",
+			id: "chart-view",
+			name: "Open Chart Modal",
 			callback: async () => new ChartModal(this.app, this).open(),
 		});
 		this.addCommand({
@@ -96,21 +97,25 @@ export default class DataAnalysisPlugin extends Plugin {
 			fieldsToCheck.forEach((field) => {
 				if (page[field]) {
 					const unproxied = this.unproxy(page[field]);
-					if (
-						unproxied.length === 1 &&
-						typeof unproxied[0] === "string"
-					) {
-						let list = unproxied[0];
-						if (list.startsWith("[") && list.endsWith("]")) {
-							list = list.slice(1, -1);
+					if (unproxied.length === 1) {
+						if (typeof unproxied[0] === "string") {
+							let list = unproxied[0];
+							if (list.startsWith("[") && list.endsWith("]")) {
+								list = list.slice(1, -1);
+							}
+							const splits = splitAndTrim(list).map((item) => {
+								if (
+									item.startsWith(`"`) &&
+									item.endsWith(`"`)
+								) {
+									return item.slice(1, -1);
+								} else return item;
+							});
+							if (splits.length === 1) page[field] = splits[0];
+							else page[field] = splits;
+						} else {
+							page[field] = unproxied[0];
 						}
-						const splits = splitAndTrim(list).map((item) => {
-							if (item.startsWith(`"`) && item.endsWith(`"`)) {
-								return item.slice(1, -1);
-							} else return item;
-						});
-						if (splits.length === 1) page[field] = splits[0];
-						else page[field] = splits;
 					} else page[field] = unproxied;
 				}
 			});
