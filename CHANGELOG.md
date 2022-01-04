@@ -1,4 +1,12 @@
 ## Changelog
+### [0.0.6](https://github.com/SkepticMystic/data-analysis/compare/0.0.5...0.0.6) (2022-01-04)
+
+
+### Features
+
+* :sparkles: Add all numeric fields! ([6b73d29](https://github.com/SkepticMystic/data-analysis/commit/6b73d291c9d28a92ed63f120fdb12743dd740f66))
+* :sparkles: Field Lists! Give the path to a file with a list of fields to check for data ([a9924b5](https://github.com/SkepticMystic/data-analysis/commit/a9924b59bb2296bb5111a2e14cbc603e8b9c254b))
+
 ### [0.0.5](https://github.com/SkepticMystic/data-analysis/compare/0.0.4...0.0.5) (2022-01-04)
 
 
