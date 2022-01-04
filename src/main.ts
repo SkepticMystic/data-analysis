@@ -86,7 +86,23 @@ export default class DataAnalysisPlugin extends Plugin {
 
 			fieldsToCheck.forEach((field) => {
 				if (page[field]) {
-					page[field] = this.unproxy(page[field]);
+					const unproxied = this.unproxy(page[field]);
+					if (
+						unproxied.length === 1 &&
+						typeof unproxied[0] === "string"
+					) {
+						let list = unproxied[0];
+						if (list.startsWith("[") && list.endsWith("]")) {
+							list = list.slice(1, -1);
+						}
+						const splits = splitAndTrim(list).map((item) => {
+							if (item.startsWith(`"`) && item.endsWith(`"`)) {
+								return item.slice(1, -1);
+							} else return item;
+						});
+						if (splits.length === 1) page[field] = splits[0];
+						else page[field] = splits;
+					} else page[field] = unproxied;
 				}
 			});
 		});
