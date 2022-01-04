@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		getMean,
-		getMedian,
-		getMode,
-		getPearsonCorrelation,
-		getStdDev,
-	} from "src/analyses";
-
+	import { getMean, getMedian, getMode, getStdDev } from "src/analyses";
 	import { StatsModal } from "../StatsModal";
 
 	export let modal: StatsModal;
@@ -17,20 +10,21 @@
 
 	let field = fieldsToCheck[0];
 
-	function updateData(field: string) {
-		return index.data.map((d) => d[field]).filter((d) => d);
-	}
+	const updateData = (field: string) =>
+		index.data.map((d) => d[field]).filter((d) => d);
 
 	$: data = updateData(field);
-	$: mean = ["Mean", getMean(data) ?? "Non-numeric data"];
-	$: median = ["Median", getMedian(data) ?? "Non-numeric data"];
-	$: mode = ["Mode", getMode(data)];
-	$: std = [
-		"Standard Dev.",
-		getStdDev(data)?.toFixed(4) ?? "Non-numeric data",
-	];
+	$: mean = getMean(data);
+	$: median = getMedian(data);
+	$: mode = getMode(data);
+	$: std = getStdDev(data);
 
-	$: stats = [mean, median, mode, std];
+	$: stats = [
+		mean ? ["Mean", mean] : null,
+		median ? ["Median", median] : null,
+		["Mode", mode],
+		std ? ["Std Dev.", std?.toFixed(4)] : null,
+	];
 	$: console.log({ stats });
 </script>
 
@@ -51,10 +45,12 @@
 		</tr>
 	</thead>
 	{#each stats as stat}
-		<tr>
-			<td>{stat[0]}</td>
-			<td>{stat[1]}</td>
-		</tr>
+		{#if stat}
+			<tr>
+				<td>{stat[0]}</td>
+				<td>{stat[1]}</td>
+			</tr>
+		{/if}
 	{/each}
 </table>
 

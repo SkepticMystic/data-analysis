@@ -80,6 +80,27 @@ export default class DataAnalysisPlugin extends Plugin {
 		return unproxied;
 	}
 
+	getInnerValue(value: any) {
+		const unproxied = this.unproxy(value);
+		if (unproxied.length === 1) {
+			if (typeof unproxied[0] === "string") {
+				let list = unproxied[0];
+				if (list.startsWith("[") && list.endsWith("]")) {
+					list = list.slice(1, -1);
+				}
+				const splits = splitAndTrim(list).map((item) => {
+					if (item.startsWith(`"`) && item.endsWith(`"`)) {
+						return item.slice(1, -1);
+					} else return item;
+				});
+				if (splits.length === 1) return splits[0];
+				else return splits;
+			} else {
+				return unproxied[0];
+			}
+		} else return unproxied;
+	}
+
 	refreshIndex(dvApi: DataviewApi) {
 		const notice = new Notice("Index refreshing...");
 		if (!dvApi) {
@@ -95,29 +116,8 @@ export default class DataAnalysisPlugin extends Plugin {
 			if (potentialDate.isValid) dates.push(potentialDate);
 
 			fieldsToCheck.forEach((field) => {
-				if (page[field]) {
-					const unproxied = this.unproxy(page[field]);
-					if (unproxied.length === 1) {
-						if (typeof unproxied[0] === "string") {
-							let list = unproxied[0];
-							if (list.startsWith("[") && list.endsWith("]")) {
-								list = list.slice(1, -1);
-							}
-							const splits = splitAndTrim(list).map((item) => {
-								if (
-									item.startsWith(`"`) &&
-									item.endsWith(`"`)
-								) {
-									return item.slice(1, -1);
-								} else return item;
-							});
-							if (splits.length === 1) page[field] = splits[0];
-							else page[field] = splits;
-						} else {
-							page[field] = unproxied[0];
-						}
-					} else page[field] = unproxied;
-				}
+				const value = page[field];
+				if (value) page[field] = this.getInnerValue(value);
 			});
 		});
 		this.index = {
@@ -127,6 +127,22 @@ export default class DataAnalysisPlugin extends Plugin {
 		};
 		console.log(this.index);
 		notice.setMessage("Index refreshed ✅");
+	}
+
+	allValuesForField(field: string) {
+		const { api } = this.app.plugins.plugins.dataview;
+		if (!api) {
+			new Notice("Dataview must be enabled");
+			return;
+		}
+
+		const values: any[] = [];
+		api.pages().values.forEach((page) => {
+			const value = page[field];
+			if (value) values.push(value);
+		});
+
+		return [...new Set(...values)];
 	}
 
 	async loadSettings() {

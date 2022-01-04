@@ -38,15 +38,13 @@
 	): Datum2d[] {
 		const fileRange = dnOnly
 			? index.data.filter((item) => {
-					console.log(item);
 					const { day }: { day: DateTime } = item.file;
-					console.log({ day });
 					return (
 						day && startDate.ts <= day.ts && day.ts <= endDate.ts
 					);
 			  })
 			: index.data;
-		console.log({ fileRange });
+
 		const innerData = fileRange
 			.map((page) => {
 				return {
