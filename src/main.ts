@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS } from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
-import { splitAndTrim } from "./utils";
+import { makeArr, splitAndTrim } from "./utils";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
@@ -59,6 +59,8 @@ export default class DataAnalysisPlugin extends Plugin {
 			name: "Open Stats Modal",
 			callback: async () => new StatsModal(this.app, this).open(),
 		});
+
+		// console.log(this.getAllCorrsForField("weight"));
 	}
 
 	onunload() {}
@@ -142,20 +144,76 @@ export default class DataAnalysisPlugin extends Plugin {
 		notice.setMessage("Index refreshed ✅");
 	}
 
-	allValuesForField(field: string) {
-		const { api } = this.app.plugins.plugins.dataview;
-		if (!api) {
-			new Notice("Dataview must be enabled");
-			return;
-		}
-
+	allUniqueValuesForField(field: string) {
 		const values: any[] = [];
-		api.pages().values.forEach((page) => {
+		this.index.data.forEach((page) => {
 			const value = page[field];
-			if (value) values.push(value);
+			if (value) values.push(...makeArr(value));
 		});
 
-		return [...new Set(...values)];
+		return [...new Set([...values])];
+	}
+
+	inferType(xs: (string | number)[]): "string" | "number" {
+		const nums = xs.filter((x) => typeof x === "number");
+		if (nums.length >= xs.length / 2) return "number";
+		else return "number";
+	}
+
+	replaceMissing(xs: (string | number)[]) {
+		const type = this.inferType(xs);
+		return xs.map((x) => x ?? (type === "number" ? 0 : "N/A"));
+	}
+
+	getAllCorrsForField(fieldA: string) {
+		const { data } = this.index;
+		const { fieldsToCheck } = this.settings;
+		const correlations = {};
+
+		const fieldsForA = this.allUniqueValuesForField(fieldA);
+
+		fieldsToCheck.forEach((fieldB) => {
+			const fieldsForB = this.allUniqueValuesForField(fieldB);
+
+			const valsInCommon: {
+				[fieldA: string]: {
+					[fieldB: string]: [
+						string | number | string[],
+						string | number | string[]
+					];
+				};
+			} = {};
+
+			if (!valsInCommon.hasOwnProperty(fieldA)) {
+				valsInCommon[fieldA] = {};
+			}
+			const valsA = data.map((d) => d[fieldA]);
+			const valsB = data.map((d) => d[fieldB]);
+
+			valsA.forEach((valA) => {
+				if (typeof valA === "string") {
+					// valsInCommon[fieldA + valA] = valA;
+				}
+			});
+			valsInCommon[fieldA][fieldB] = [valsA, valsB];
+
+			// for (const fieldA in valsInCommon) {
+			// 	for (const fieldB in valsInCommon) {
+			// 		const [valA, valB] = valsInCommon[fieldA][fieldB];
+			// 		[valA, valB].forEach((val, i) => {
+			// 			const arr = makeArr(val);
+			// 			if (typeof arr[0] === "string") {
+			// 				valsInCommon[fieldA][fieldB][i] = arr.map((x) => {
+			// 					if (i === 0)
+			// 						return fieldsForA.includes(x) ? 1 : 0;
+			// 					else return fieldsForB.includes(x) ? 1 : 0;
+			// 				});
+			// 			}
+			// 		});
+			// 	}
+			// }
+			console.log(valsInCommon);
+		});
 	}
 
 	async loadSettings() {
