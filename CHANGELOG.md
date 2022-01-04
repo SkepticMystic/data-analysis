@@ -1,4 +1,18 @@
 ## Changelog
+### [0.0.4](https://github.com/SkepticMystic/data-analysis/compare/0.0.3...0.0.4) (2022-01-04)
+
+
+### Features
+
+* **Analyses:** :sparkles: Lots of new analysis functions ([957b2b0](https://github.com/SkepticMystic/data-analysis/commit/957b2b0ea1a82818191055377ac9824b0d157ea4))
+* **ChartModal:** :sparkles: Choose from a range of dates from your daily notes ([5f9ae8d](https://github.com/SkepticMystic/data-analysis/commit/5f9ae8d7cbf45843f7c58f64bf523346fe42710f))
+* **StatsModal:** :sparkles: Working StatsModal! ([5763983](https://github.com/SkepticMystic/data-analysis/commit/57639831c22d6e2e40d31213cf543dc59e816016))
+
+
+### Fixes
+
+* :bug: Don't return length 1 arrays when they will always be that long ([7efe362](https://github.com/SkepticMystic/data-analysis/commit/7efe36289c9ea506f11dc263b41028fafb13e16f))
+
 ### [0.0.3](https://github.com/SkepticMystic/data-analysis/compare/0.0.2...0.0.3) (2022-01-04)
 
 
