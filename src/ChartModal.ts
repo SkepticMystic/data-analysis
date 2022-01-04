@@ -1,10 +1,10 @@
 import { App, Modal } from "obsidian";
-import Analysis from "./Components/Analysis.svelte";
+import Chart from "./Components/Chart.svelte";
 import type DataAnalysisPlugin from "./main";
 
-export class AnalysisModal extends Modal {
+export class ChartModal extends Modal {
 	plugin: DataAnalysisPlugin;
-	modal: AnalysisModal;
+	modal: ChartModal;
 
 	constructor(app: App, plugin: DataAnalysisPlugin) {
 		super(app);
@@ -16,7 +16,7 @@ export class AnalysisModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		new Analysis({
+		new Chart({
 			target: contentEl,
 			props: {
 				modal: this,
