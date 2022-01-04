@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import { DEFAULT_SETTINGS } from "./const";
 import DataAnalysisPlugin from "./main";
 import { splitAndTrim } from "./utils";
@@ -17,6 +17,7 @@ export class SettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
+			.setClass("fields-to-check")
 			.setName("Fields to Check")
 			.setDesc("A comma-separated list of fields to look for data in.")
 			.addTextArea((text) => {
@@ -30,7 +31,30 @@ export class SettingTab extends PluginSettingTab {
 					);
 				};
 			});
+		new Setting(containerEl)
+			.setName("Add All Numeric Fields")
+			.setDesc(
+				"Add all fields with numeric values to the list of fields to check"
+			)
+			.addButton((but) => {
+				but.setButtonText("Add").onClick(async () => {
+					const { data } = plugin.index;
+					for (const page of data) {
+						for (const field in page) {
+							if (
+								typeof page[field] === "number" &&
+								!settings.fieldsToCheck.includes(field)
+							) {
+								settings.fieldsToCheck.push(field);
+								await plugin.saveSettings();
+							}
+						}
+					}
 
+					this.display();
+					new Notice("Numeric fields added");
+				});
+			});
 
 		new Setting(containerEl)
 			.setName("Field Lists")
