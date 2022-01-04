@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
-import { Notice, Plugin } from "obsidian";
+import { Notice, Plugin, TFile } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
-import { AnalysisModal } from "./AnalysisModal";
+import { ChartModal } from "./ChartModal";
 import { DEFAULT_SETTINGS } from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
@@ -13,7 +13,11 @@ export default class DataAnalysisPlugin extends Plugin {
 		data: { [field: string]: DataType }[];
 		minDate: DateTime;
 		maxDate: DateTime;
-	} = { data: undefined, minDate: undefined, maxDate: undefined };
+	} = {
+		data: undefined,
+		minDate: undefined,
+		maxDate: undefined,
+	};
 
 	async onload() {
 		console.log("Loading data-analysis plugin");
@@ -47,7 +51,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		this.addCommand({
 			id: "analysis-view",
 			name: "Open Analysis Modal",
-			callback: async () => new AnalysisModal(this.app, this).open(),
+			callback: async () => new ChartModal(this.app, this).open(),
 		});
 	}
 
