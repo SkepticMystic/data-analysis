@@ -6,4 +6,4 @@
 	const { app, plugin } = modal;
 </script>
 
-<h1>test</h1>
+<Checkboxes {options} {plugin} bind:selected />
