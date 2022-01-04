@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { AnalysisModal } from "src/AnalysisModal";
 	import Checkboxes from "./Checkboxes.svelte";
+	import ChartOptions from "./ChartOptions.svelte";
 	import Scatter from "svelte-chartjs/src/Scatter.svelte";
 	import { pearsonCorrelation } from "src/analyses";
 
@@ -13,6 +14,7 @@
 	let options = fieldsToCheck;
 	let selected: string[] = [];
 
+	let colour = "#15a252";
 	interface Datum2d {
 		x: number;
 		y: number;
@@ -38,38 +40,23 @@
 		);
 	}
 
-	let innerData = refreshInnerData(selected);
-	let correlation = refreshCorrelation(innerData);
-
-	$: {
-		innerData = refreshInnerData(selected);
-		correlation = refreshCorrelation(innerData);
-		console.log(innerData);
+	function refreshData(colour: string, innerData: Datum2d[]) {
+		return {
+			labels: ["Scatter"],
+			datasets: [
+				{
+					borderColor: colour,
+					backgroundColor: colour,
+					label: "V(node2)",
+					data: innerData,
+				},
+			],
+		};
 	}
 
-	let data = {
-		labels: ["Scatter"],
-		datasets: [
-			{
-				borderColor: "rgba(99,0,125, .2)",
-				backgroundColor: "rgba(99,0,125, .5)",
-				label: "V(node2)",
-				data: innerData,
-			},
-		],
-	};
 
-	$: data = {
-		labels: ["Scatter"],
-		datasets: [
-			{
-				borderColor: "rgba(99,0,125, .2)",
-				backgroundColor: "red",
-				label: "V(node2)",
-				data: innerData,
-			},
-		],
-	};
+	let data = refreshData(colour, innerData);
+	$: data = refreshData(colour, innerData);
 
 	let chartOptions = {
 		title: {
@@ -120,7 +107,6 @@
 	};
 </script>
 
-<Checkboxes {options} {plugin} bind:selected />
-
+<ChartOptions bind:colour />
 <Scatter {data} options={chartOptions} />
 <div>Correlation: {correlation}</div>
