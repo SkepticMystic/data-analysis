@@ -31,6 +31,23 @@ export class SettingTab extends PluginSettingTab {
 				};
 			});
 
+
+		new Setting(containerEl)
+			.setName("Field Lists")
+			.setDesc(
+				"A comma-separated list of files that you keep fields in. Each field must be on a new line. It can be a wikilink, or not."
+			)
+			.addText((text) => {
+				text.setValue(settings.fieldLists.join(", "));
+				text.inputEl.onblur = async () => {
+					const splits = splitAndTrim(text.getValue());
+					settings.fieldLists = splits;
+					await plugin.saveSettings();
+					await plugin.refreshIndex(
+						this.app.plugins.plugins.dataview?.api
+					);
+				};
+			});
 		new Setting(containerEl)
 			.setName("Date Format")
 			.setDesc("The date format you use in your vault.")

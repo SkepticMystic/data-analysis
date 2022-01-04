@@ -101,13 +101,26 @@ export default class DataAnalysisPlugin extends Plugin {
 		} else return unproxied;
 	}
 
-	refreshIndex(dvApi: DataviewApi) {
+	async refreshIndex(dvApi: DataviewApi) {
 		const notice = new Notice("Index refreshing...");
 		if (!dvApi) {
 			notice.setMessage("Dataview must be enabled");
 			return;
 		}
-		const { fieldsToCheck } = this.settings;
+		const { fieldsToCheck, fieldLists } = this.settings;
+		for (const path of fieldLists) {
+			const file = this.app.metadataCache.getFirstLinkpathDest(path, "");
+			if (!file) continue;
+
+			const content = await this.app.vault.cachedRead(file);
+			const lines = content.split("\n");
+			lines.forEach((line) => {
+				const field = line.startsWith("[[") ? line.slice(2, -2) : line;
+				if (!fieldsToCheck.includes(field)) fieldsToCheck.push(field);
+			});
+			this.settings.fieldsToCheck = fieldsToCheck;
+			await this.saveSettings();
+		}
 
 		const pages: { [field: string]: any }[] = dvApi.pages().values;
 		const dates: DateTime[] = [];
