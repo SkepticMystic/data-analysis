@@ -1,4 +1,14 @@
 ## Changelog
+### [0.0.3](https://github.com/SkepticMystic/data-analysis/compare/0.0.2...0.0.3) (2022-01-04)
+
+
+### Features
+
+* :sparkles: Support different list types for inline fields ([b9e605b](https://github.com/SkepticMystic/data-analysis/commit/b9e605b0eb5484508a58837731ab6c4e56cef70b))
+* **ChartModal:** :sparkles: Change colour of data points ([02f26e8](https://github.com/SkepticMystic/data-analysis/commit/02f26e894b1e4fecd7a9bd1d0cfe602d5fa63234))
+* **ChartModal:** :sparkles: Parse daily note dates, and allow narrowing of date range ([eb2de51](https://github.com/SkepticMystic/data-analysis/commit/eb2de519499459e4d193b89ccf3df75ed6d91fd3))
+* **ChartModal:** :sparkles: Show selected fields as axes titles ([1cd708a](https://github.com/SkepticMystic/data-analysis/commit/1cd708ac245801923f412a3783a9bceea77f5b26))
+
 ### 0.0.2 (2022-01-04)
 
 
