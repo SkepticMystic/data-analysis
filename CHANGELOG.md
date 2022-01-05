@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.13](https://github.com/SkepticMystic/data-analysis/compare/0.0.12...0.0.13) (2022-01-05)
+
+
+### Features
+
+* **ChartModal:** :sparkles: Search bars instead of checkbox hell ([b4c55e6](https://github.com/SkepticMystic/data-analysis/commit/b4c55e63912ffce7ab0d0b894fe984845d3bc384))
+
 ### [0.0.12](https://github.com/SkepticMystic/data-analysis/compare/0.0.11...0.0.12) (2022-01-05)
 
 
