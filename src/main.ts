@@ -15,6 +15,7 @@ import { StatsModal } from "./StatsModal";
 import {
 	arrayOverlap,
 	makeArr,
+	makeSub,
 	splitAndTrim,
 	stringToNullOrUndefined,
 } from "./utils";
@@ -479,13 +480,12 @@ export default class DataAnalysisPlugin extends Plugin {
 				const subs = unwrappedFields[field];
 				if (val !== null && val !== undefined) {
 					subs.forEach((sub) => {
-						if (val.includes && val.includes(sub)) {
-							currRow[field + "." + sub] = 1;
-						}
+						if (val.includes && val.includes(sub))
+							currRow[makeSub(field, sub)] = 1;
 					});
 				} else {
 					subs.forEach((sub) => {
-						currRow[field + "." + sub] = 0;
+						currRow[makeSub(field, sub)] = 0;
 					});
 				}
 			}

@@ -13,16 +13,13 @@
 	const { fieldsToCheck } = settings;
 
 	let allFields = fieldsToCheck;
-	let selected: string[] = [];
+	let first: string;
+	let second: string;
 
 	let colour = "#15a252";
 	let startDate = index.minDate;
 	let endDate = index.maxDate;
 	let dnOnly = false;
-
-	function isValidSelection(selected: string[]) {
-		return selected.length === 2;
-	}
 
 	interface Datum2d {
 		x: number;
@@ -30,8 +27,13 @@
 		name: string;
 	}
 
+	function isValidSelection(first: string, second: string) {
+		return first && second;
+	}
+
 	function refreshInnerData(
-		selected: string[],
+		first: string,
+		second: string,
 		dnOnly: boolean,
 		startDate: DateTime,
 		endDate: DateTime
@@ -48,8 +50,8 @@
 		const innerData = fileRange
 			.map((page) => {
 				return {
-					x: page[selected[0]] as number,
-					y: page[selected[1]] as number,
+					x: page[first] as number,
+					y: page[second] as number,
 					name: page.file.name,
 				};
 			})
@@ -59,8 +61,12 @@
 		return innerData;
 	}
 
-	function refreshCorrelation(selected: string[], innerData: Datum2d[]) {
-		return isValidSelection(selected)
+	function refreshCorrelation(
+		first: string,
+		second: string,
+		innerData: Datum2d[]
+	) {
+		return isValidSelection(first, second)
 			? getPearsonCorrelation(
 					innerData.map((p) => p.x),
 					innerData.map((p) => p.y)
@@ -75,14 +81,14 @@
 				{
 					borderColor: colour,
 					backgroundColor: colour,
-					label: "V(node2)",
+					label: "Data",
 					data: innerData,
 				},
 			],
 		};
 	}
 
-	function refreshChartOptions(selected: string[]) {
+	function refreshChartOptions(first: string, second: string) {
 		return {
 			title: {
 				display: true,
@@ -91,8 +97,8 @@
 			scales: {
 				xAxes: {
 					title: {
-						display: isValidSelection(selected),
-						text: selected[0] ?? "",
+						display: isValidSelection(first, second),
+						text: first ?? "",
 					},
 					type: "linear",
 					position: "bottom",
@@ -109,8 +115,8 @@
 						display: true,
 					},
 					title: {
-						display: isValidSelection(selected),
-						text: selected[1] ?? "",
+						display: isValidSelection(first, second),
+						text: second ?? "",
 					},
 				},
 			},
@@ -127,14 +133,26 @@
 		};
 	}
 
-	$: innerData = refreshInnerData(selected, dnOnly, startDate, endDate);
-	$: correlation = refreshCorrelation(selected, innerData);
+	$: innerData = refreshInnerData(first, second, dnOnly, startDate, endDate);
+	$: correlation = refreshCorrelation(first, second, innerData);
 	$: data = refreshData(colour, innerData);
-	$: chartOptions = refreshChartOptions(selected);
+	$: chartOptions = refreshChartOptions(first, second);
 </script>
 
 <div class="checkboxes">
-	<Checkboxes options={allFields} {plugin} bind:selected />
+	<datalist id="fields">
+		{#each allFields as field}
+			<option value={field} />
+		{/each}
+	</datalist>
+	<label for="fields">
+		Field 1:
+		<input bind:value={first} list="fields" />
+	</label>
+	<label for="seconds">
+		Field 2:
+		<input bind:value={second} list="fields" />
+	</label>
 </div>
 
 <ChartOptions bind:colour bind:startDate bind:endDate bind:dnOnly />
@@ -146,5 +164,6 @@
 	div.checkboxes {
 		border-radius: 5px;
 		border: 1px solid var(--background-modifier-border);
+		padding: 3px;
 	}
 </style>
