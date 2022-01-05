@@ -25,16 +25,16 @@
 		["Mode", mode],
 		std ? ["Std Dev.", std?.toFixed(4)] : null,
 	];
-	$: console.log({ stats });
 </script>
 
-<label>
+<datalist id="fields">
+	{#each fieldsToCheck as field}
+		<option value={field} />
+	{/each}
+</datalist>
+<label for="fields">
 	Field:
-	<select class="dropdown" bind:value={field}>
-		{#each fieldsToCheck as field}
-			<option value={field}>{field}</option>
-		{/each}
-	</select>
+	<input bind:value={field} list="fields" />
 </label>
 
 <table>
