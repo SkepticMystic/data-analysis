@@ -1,4 +1,19 @@
 ## Changelog
+### [0.0.9](https://github.com/SkepticMystic/data-analysis/compare/0.0.8...0.0.9) (2022-01-05)
+
+
+### Features
+
+* **CorrelationView:** :sparkles: Work with subfields! ([389bb8b](https://github.com/SkepticMystic/data-analysis/commit/389bb8b7c6f9cf3822025ccca28ff4f8dab177c4))
+
+
+### Fixes
+
+* :bug: Don't add duplicate fields in kebab-case ([5856deb](https://github.com/SkepticMystic/data-analysis/commit/5856deb24c9dbcb541101f1f85019fb31c31c0c6))
+* :bug: Remove duplicate fields from fieldsToCheck ([e344ecb](https://github.com/SkepticMystic/data-analysis/commit/e344ecb0d409d1635e583addca3c94db2e9bffa9))
+* **CorrelationView:** :bug: Fix table scrolling ([8854261](https://github.com/SkepticMystic/data-analysis/commit/8854261e98d413cf004f5b88a011448ad3a8d464))
+* **CorrelationView:** :bug: Load and unload properly ([affa9de](https://github.com/SkepticMystic/data-analysis/commit/affa9de71dae15675a0f694755726cbebca92ae5))
+
 ### [0.0.8](https://github.com/SkepticMystic/data-analysis/compare/0.0.7...0.0.8) (2022-01-05)
 
 
