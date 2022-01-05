@@ -16,6 +16,7 @@ export default class CorrelationView extends ItemView {
 
 	async onload(): Promise<void> {
 		super.onload();
+		await this.draw();
 	}
 
 	getViewType() {
@@ -27,9 +28,7 @@ export default class CorrelationView extends ItemView {
 
 	icon = addFeatherIcon("trending-up") as string;
 
-	async onOpen(): Promise<void> {
-		await this.draw();
-	}
+	async onOpen(): Promise<void> {}
 
 	onClose(): Promise<void> {
 		this.view?.$destroy();
@@ -37,9 +36,10 @@ export default class CorrelationView extends ItemView {
 	}
 
 	async draw(): Promise<void> {
-		const { containerEl } = this;
-		containerEl.empty();
+		const { contentEl } = this;
 
-		new Correlations({ target: containerEl, props: { view: this } });
+		contentEl.empty();
+		contentEl.addClass("DA-corr-view");
+		new Correlations({ target: contentEl, props: { view: this } });
 	}
 }
