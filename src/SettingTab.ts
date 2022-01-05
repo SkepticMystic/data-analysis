@@ -24,8 +24,16 @@ export class SettingTab extends PluginSettingTab {
 				text.setValue(settings.fieldsToCheck.join(", "));
 				text.inputEl.onblur = async () => {
 					const splits = splitAndTrim(text.getValue());
-					settings.fieldsToCheck = splits;
-					await plugin.saveSettings();
+					const noDups = [...new Set(splits)];
+					if (splits.length !== noDups.length) {
+						new Notice("Duplicates found and removed");
+						await plugin.saveSettings();
+						settings.fieldsToCheck = noDups;
+						this.display();
+					} else {
+						await plugin.saveSettings();
+						settings.fieldsToCheck = splits;
+					}
 					await plugin.refreshIndex(
 						plugin.app.plugins.plugins.dataview?.api
 					);
