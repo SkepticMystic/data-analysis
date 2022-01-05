@@ -5,6 +5,9 @@
  * @returns The correlation coefficient.
  */
 export function getPearsonCorrelation(xs: number[], ys: number[]) {
+	if (xs.length <= 1 || ys.length <= 1 || !isQuant(xs) || !isQuant(ys))
+		return null;
+
 	const n = xs.length;
 	if (n !== ys.length) throw new Error("Arrays must be the same length");
 
@@ -28,6 +31,27 @@ export function getPearsonCorrelation(xs: number[], ys: number[]) {
 		(n * sum_xy - sum_x * sum_y) /
 		Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y));
 
+	// const n = xs.length;
+	// const x_bar = getMean(xs);
+	// const y_bar = getMean(ys);
+
+	// let sum_x_minus_mu = 0;
+	// let sum_y_minus_mu = 0;
+
+	// for (let i = 0; i < n; i++) {
+	// 	const x = xs[i];
+	// 	const y = ys[i];
+
+	// 	sum_x_minus_mu += x - x_bar;
+	// 	sum_y_minus_mu += y - y_bar;
+	// }
+
+	// const corr =
+	// 	(sum_x_minus_mu * sum_y_minus_mu) /
+	// 	Math.sqrt(
+	// 		sum_x_minus_mu * sum_x_minus_mu * sum_y_minus_mu * sum_y_minus_mu
+	// 	);
+
 	return corr;
 }
 
@@ -35,7 +59,7 @@ export function getPointBiserialCorrelation(
 	xs: (number | boolean)[],
 	ys: number[]
 ) {
-	if (xs.length <= 1 || ys.length <= 1 || (!isBinary(xs) && !isQuant(ys)))
+	if (xs.length <= 1 || ys.length <= 1 || !isBinary(xs) || !isQuant(ys))
 		return null;
 
 	const m0 = [],
