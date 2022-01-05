@@ -2,6 +2,7 @@
     "conventionalCommits.scopes": [
         "Analyses",
         "ChartModal",
-        "StatsModal"
+        "StatsModal",
+        "WriteToCSV"
     ]
 }

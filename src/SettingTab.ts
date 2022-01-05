@@ -84,5 +84,61 @@ export class SettingTab extends PluginSettingTab {
 						await plugin.saveSettings();
 					});
 			});
+
+		containerEl.createEl("h2", { text: "Exporting Data" });
+
+		new Setting(containerEl)
+			.setName("Default save path")
+			.setDesc(
+				'The full file path to save the metadataframe to. Don\'t include the file extension. For example, this is a correct file path: SubFolder/metadataframe. Use "/" to save to the root of your vault.'
+			)
+			.addText((text) =>
+				text
+					.setValue(settings.defaultSavePath)
+					.onChange(async (value) => {
+						settings.defaultSavePath = value;
+						await plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Null value")
+			.setDesc(
+				"What should the default value be for missing field values? Default is 'null'. Don't use quotes, just enter the value."
+			)
+			.addText((text) =>
+				text.setValue(settings.nullValue).onChange(async (value) => {
+					settings.nullValue = value;
+					await plugin.saveSettings();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName("Add inherent file metadata")
+			.setDesc(
+				"Each file has alot of inherent metadata to it (besides the fields you add). Should metadataframe add these fields too? It can be alot, so there is the option to disable this behaviour."
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(settings.addFileData)
+					.onChange(async (value) => {
+						settings.addFileData = value;
+						await plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Add content of each note")
+			.setDesc(
+				"Add a column for the content of each note. This will add alot of size to the CSV file, so it is off by default."
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(settings.addNoteContent)
+					.onChange(async (value) => {
+						settings.addNoteContent = value;
+						await plugin.saveSettings();
+					})
+			);
 	}
 }

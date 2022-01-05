@@ -1,12 +1,13 @@
 import { DateTime } from "luxon";
-import { Notice, Plugin } from "obsidian";
+import { Parser, transforms } from "json2csv";
+import { normalizePath, Notice, Plugin } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
-import { DEFAULT_SETTINGS } from "./const";
+import { DEFAULT_SETTINGS, dropHeaderOrAlias, splitLinksRegex } from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
-import { makeArr, splitAndTrim } from "./utils";
+import { makeArr, splitAndTrim, stringToNullOrUndefined } from "./utils";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
@@ -60,7 +61,20 @@ export default class DataAnalysisPlugin extends Plugin {
 			callback: async () => new StatsModal(this.app, this).open(),
 		});
 
-		// console.log(this.getAllCorrsForField("weight"));
+		this.addCommand({
+			id: "write-metadataframe",
+			name: "Write Metadataframe",
+			callback: async () => {
+				try {
+					const jsDF = await this.createJSDF();
+					console.log(jsDF);
+					await this.writeMetadataframe(jsDF);
+				} catch (error) {
+					new Notice("An error occured. Please check the console.");
+					console.log(error);
+				}
+			},
+		});
 	}
 
 	onunload() {}
@@ -214,6 +228,132 @@ export default class DataAnalysisPlugin extends Plugin {
 			// }
 			console.log(valsInCommon);
 		});
+	}
+
+	async createJSDF() {
+		const { settings } = this;
+		const {
+			addNoteContent,
+			addFileData,
+			nullValue,
+			undefinedValue,
+			fieldsToCheck,
+		} = settings;
+
+		let yamldf: { [key: string]: any }[] = [];
+		let uniqueKeys: string[] = [];
+
+		let actualNullValue = stringToNullOrUndefined(nullValue);
+
+		for (const page of this.index.data) {
+			const { file } = page;
+
+			const currRow = { file: { path: file.path }, content: "" };
+
+			if (addNoteContent) {
+				const content = await this.app.vault.cachedRead(file);
+				currRow["content"] = content;
+			}
+
+			for (const key of fieldsToCheck) {
+				// Process values
+				if (key !== "position") {
+					if (key !== "file" || addFileData) {
+						const value = page[key];
+						const arrValues = [value].flat(4);
+
+						// Collect unique keys for later
+						if (!uniqueKeys.includes(key)) uniqueKeys.push(key);
+
+						if (!value) {
+							// Null values
+							currRow[key] = actualNullValue;
+						} else if (typeof value === "string") {
+							// String values
+
+							const splits = value.match(splitLinksRegex);
+							if (splits !== null) {
+								const strs = splits
+									.map((link) => {
+										const dropped =
+											link.match(dropHeaderOrAlias)?.[1];
+										if (dropped) {
+											return `[[${dropped}]]`;
+										} else {
+											return link;
+										}
+									})
+									.join(", ");
+								currRow[key] = strs;
+							} else {
+								currRow[key] = value;
+							}
+						} else if (arrValues?.[0]?.ts) {
+							// Dates
+							currRow[key] = arrValues
+								.map((val) => val?.ts)
+								.join(", ");
+						} else if (arrValues?.[0]?.path) {
+							// Link objects
+							currRow[key] = arrValues
+								.map((val) => `[[${val?.path}]]`)
+								.join(", ");
+						} else if (
+							Object.prototype.toString.call(value) ===
+							"[object Object]"
+						) {
+							currRow[key] = value;
+						} else {
+							// Miscellaneous arrays are joined into strings
+							currRow[key] = arrValues.join(", ");
+						}
+					}
+				}
+			}
+
+			yamldf.push(currRow);
+		}
+
+		let actualUndefinedValue = stringToNullOrUndefined(undefinedValue);
+
+		for (let i = 0; i < Object.keys(yamldf).length; i++) {
+			uniqueKeys.forEach((key) => {
+				if (yamldf[i][key] === undefined) {
+					yamldf[i][key] = actualUndefinedValue;
+				}
+			});
+		}
+		return yamldf;
+	}
+
+	async writeMetadataframe(jsDF: { [key: string]: string | number }[]) {
+		const { nullValue, defaultSavePath } = this.settings;
+		const defaultValue = nullValue;
+
+		const opts = { defaultValue, transforms: [transforms.flatten()] };
+
+		let csv = "";
+		try {
+			const parser = new Parser(opts);
+			csv = parser.parse(jsDF);
+
+			if (defaultSavePath === "" && csv !== "") {
+				new Notice("Please choose a path to save to in settings");
+			} else {
+				try {
+					console.log("here");
+					const savePath = normalizePath(defaultSavePath);
+					const now = window.moment().format("YYYY-MM-DD HHmmss");
+
+					await this.app.vault.create(`${savePath} ${now}.csv`, csv);
+					new Notice("Write Metadataframe complete");
+				} catch (error) {
+					new Notice("File already exists");
+				}
+			}
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
 	async loadSettings() {

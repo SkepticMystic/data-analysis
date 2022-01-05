@@ -6,3 +6,9 @@ export const splitAndTrim = (fields: string): string[] => {
 export function makeArr<T>(input: T | T[]): T[] {
 	return [input].flat();
 }
+
+export function stringToNullOrUndefined(current: string) {
+	if (current === "undefined") return undefined;
+	else if (current === "null") return null;
+	else return current;
+}
