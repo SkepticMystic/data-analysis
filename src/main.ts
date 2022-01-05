@@ -3,7 +3,12 @@ import { Parser, transforms } from "json2csv";
 import { normalizePath, Notice, Plugin } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
-import { DEFAULT_SETTINGS, dropHeaderOrAlias, splitLinksRegex } from "./const";
+import {
+	CORRELATION_VIEW,
+	DEFAULT_SETTINGS,
+	dropHeaderOrAlias,
+	splitLinksRegex,
+} from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
@@ -21,10 +26,12 @@ export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
 	index: {
 		data: { [field: string]: DataType }[];
+		corrs: { [field: string]: { [field: string]: number } };
 		minDate: DateTime;
 		maxDate: DateTime;
 	} = {
 		data: undefined,
+		corrs: undefined,
 		minDate: undefined,
 		maxDate: undefined,
 	};
@@ -222,11 +229,10 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.unwrapStrLists(pages);
 
-		this.index = {
-			data: pages,
-			minDate: DateTime.min(...dates),
-			maxDate: DateTime.max(...dates),
-		};
+		this.index.data = pages;
+		this.index.minDate = DateTime.min(...dates);
+		this.index.maxDate = DateTime.max(...dates);
+
 		console.log(this.index);
 		notice.setMessage("Index refreshed ✅");
 	}
@@ -303,18 +309,18 @@ export default class DataAnalysisPlugin extends Plugin {
 					});
 				} else if (tA === "number" && tB === "object") {
 					const oA = vA.filter((a) => a);
-					console.log({ vB });
-					const oB = vB as string[][];
-					// .filter((b, i) => vA[i] !== undefined)
-					// .map((b) => b ?? 0);
-					console.log({ vA, vB, oA, oB });
+					const oB = (vB as string[][]).filter(
+						(b, i) => vA[i] !== undefined
+					);
 
-					const uniqueStrs = [...new Set(oB)].filter(
+					const uniqueStrs = [...new Set(oB.flat())].filter(
 						(str) => typeof str === "string"
 					);
 					uniqueStrs.forEach((subF) => {
 						const subA = oA;
-						const subB = oB.map((b) => (b === subF ? 1 : 0));
+						const subB = oB.map((b) =>
+							b && b.includes(subF) ? 1 : 0
+						);
 
 						const corr = getPointBiserialCorrelation(subB, subA);
 						corrs[fA][subF] = corr;
@@ -329,6 +335,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			}
 		}
 		console.log({ corrs });
+		this.index.corrs = corrs;
 	}
 
 	getAllCorrsForField(fieldA: string) {
