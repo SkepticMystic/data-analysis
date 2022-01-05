@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.14](https://github.com/SkepticMystic/data-analysis/compare/0.0.13...0.0.14) (2022-01-05)
+
+
+### Features
+
+* **StatsModal:** :sparkles: Search selector like with ChartModal ([837540c](https://github.com/SkepticMystic/data-analysis/commit/837540cc43c7947f5921b208754a6be519d57c47))
+
 ### [0.0.13](https://github.com/SkepticMystic/data-analysis/compare/0.0.12...0.0.13) (2022-01-05)
 
 
