@@ -1,4 +1,12 @@
 ## Changelog
+### [0.0.8](https://github.com/SkepticMystic/data-analysis/compare/0.0.7...0.0.8) (2022-01-05)
+
+
+### Features
+
+* :sparkles: Handle links and lists of links ([ab5e410](https://github.com/SkepticMystic/data-analysis/commit/ab5e410bc88c0ff7c6d5dd3eb58e5bc38c4c4ab3))
+* **CorrelationView:** :sparkles: Working! ([e485ab0](https://github.com/SkepticMystic/data-analysis/commit/e485ab033b202f5aee319bf7246898b2b648ea67))
+
 ### [0.0.7](https://github.com/SkepticMystic/data-analysis/compare/0.0.6...0.0.7) (2022-01-05)
 
 
