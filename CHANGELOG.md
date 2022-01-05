@@ -1,4 +1,17 @@
 ## Changelog
+### [0.0.11](https://github.com/SkepticMystic/data-analysis/compare/0.0.10...0.0.11) (2022-01-05)
+
+
+### Features
+
+* **CorrelationView:** :sparkles: Absolute value toggle ([25d3d1f](https://github.com/SkepticMystic/data-analysis/commit/25d3d1f2a8d9631a3ac4d106eddea61fd0178c84))
+* **CorrelationView:** :sparkles: Refresh button ([7bae266](https://github.com/SkepticMystic/data-analysis/commit/7bae266987afca4e9ea8ac2052ac66c356285aa0))
+
+
+### Fixes
+
+* **WriteToCSV:** :bug: Allow more non-null fields thru ([c1c00f3](https://github.com/SkepticMystic/data-analysis/commit/c1c00f37a29948b09ecb3fef70d5dd298d5f3e4b))
+
 ### [0.0.10](https://github.com/SkepticMystic/data-analysis/compare/0.0.9...0.0.10) (2022-01-05)
 
 
