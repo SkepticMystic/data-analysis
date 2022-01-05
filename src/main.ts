@@ -44,7 +44,6 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
-		
 		const onAPIReady = async (api: DataviewApi) => {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex(api);
@@ -424,7 +423,7 @@ export default class DataAnalysisPlugin extends Plugin {
 						// Collect unique keys for later
 						if (!uniqueKeys.includes(key)) uniqueKeys.push(key);
 
-						if (!value) {
+						if (value === null || value == undefined) {
 							// Null values
 							currRow[key] = actualNullValue;
 						} else if (typeof value === "string") {
