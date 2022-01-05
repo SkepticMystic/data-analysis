@@ -31,14 +31,18 @@ export function getPearsonCorrelation(xs: number[], ys: number[]) {
 	return corr;
 }
 
-export function getPointBiserialCorrelation(xs: number[], ys: number[]) {
-	if (!isBinary(xs) && !isQuant(ys)) return null;
+export function getPointBiserialCorrelation(
+	xs: (number | boolean)[],
+	ys: number[]
+) {
+	if (xs.length <= 1 || ys.length <= 1 || (!isBinary(xs) && !isQuant(ys)))
+		return null;
 
 	const m0 = [],
 		m1 = [];
 	xs.forEach((x, i) => {
 		const y = ys[i];
-		if (x === 0) m0.push(y);
+		if (!x) m0.push(y);
 		else m1.push(y);
 	});
 
@@ -62,8 +66,11 @@ export function isQuant(xs: number[]): boolean {
  * @param {arraytype} xs - number[]
  * @returns {boolean}
  */
-export function isBinary(xs: number[]): boolean {
-	return xs.length && xs.every((x) => x === 0 || x === 1);
+export function isBinary(xs: (number | boolean)[]): boolean {
+	return (
+		xs.length &&
+		xs.every((x) => x === 0 || x === 1 || x === false || x === true)
+	);
 }
 
 /**

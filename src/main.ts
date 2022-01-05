@@ -7,7 +7,13 @@ import { DEFAULT_SETTINGS, dropHeaderOrAlias, splitLinksRegex } from "./const";
 import { DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
-import { makeArr, splitAndTrim, stringToNullOrUndefined } from "./utils";
+import {
+	arrayOverlap,
+	makeArr,
+	splitAndTrim,
+	stringToNullOrUndefined,
+} from "./utils";
+import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
@@ -210,10 +216,19 @@ export default class DataAnalysisPlugin extends Plugin {
 		return [...new Set([...values])];
 	}
 
-	inferType(xs: (string | number)[]): "string" | "number" {
-		const nums = xs.filter((x) => typeof x === "number");
-		if (nums.length >= xs.length / 2) return "number";
-		else return "number";
+	inferType(
+		xs: (string | number)[]
+	): "string" | "number" | "object" | "undefined" {
+		const defineds = xs.filter((x) => x);
+		const types = defineds.map((x) => typeof x);
+		if (!defineds.length) return "undefined";
+		const thresh = defineds.length / 2;
+
+		if (types.filter((x) => x === "number").length >= thresh)
+			return "number";
+		else if (types.filter((x) => x === "string").length >= thresh)
+			return "string";
+		else return "object";
 	}
 
 	replaceMissing(xs: (string | number)[]) {
@@ -224,10 +239,71 @@ export default class DataAnalysisPlugin extends Plugin {
 	buildAllCorrelations() {
 		const { data } = this.index;
 		const { fieldsToCheck } = this.settings;
+		const corrs: { [fA: string]: { [fB: string]: number } } = {};
 
-		const allFieldsToCheck = [...fieldsToCheck, this.unwrappedFields];
+		for (const fA of fieldsToCheck) {
+			corrs[fA] = {};
+			const vA = data.map((d) => d[fA]);
+			const tA = this.inferType(vA);
+			for (const fB of fieldsToCheck) {
+				if (fA === fB) continue;
+				const vB = data.map((d) => d[fB]);
+				const tB = this.inferType(vB);
 
-		console.log({ data });
+				if (tA === "number" && tB === "number") {
+					const [oA, oB] = arrayOverlap(vA, vB);
+					// Skip empty arrays
+					// Also can't get corr of one value
+					if (oA.length <= 1 || oB.length <= 1) {
+						corrs[fA][fB] = null;
+						continue;
+					}
+					const corr = getPearsonCorrelation(oA, oB);
+					corrs[fA][fB] = corr;
+				} else if (tA === "number" && tB === "string") {
+					const oA = vA.filter((a) => a);
+					const oB = vB
+						.filter((b, i) => vA[i] !== undefined)
+						.map((b) => b ?? 0);
+
+					const uniqueStrs = [...new Set(oB)].filter(
+						(str) => typeof str === "string"
+					);
+					uniqueStrs.forEach((subF) => {
+						const subA = oA;
+						const subB = oB.map((b) => (b === subF ? 1 : 0));
+
+						const corr = getPointBiserialCorrelation(subB, subA);
+						corrs[fA][subF] = corr;
+					});
+				} else if (tA === "number" && tB === "object") {
+					const oA = vA.filter((a) => a);
+					console.log({ vB });
+					const oB = vB as string[][];
+					// .filter((b, i) => vA[i] !== undefined)
+					// .map((b) => b ?? 0);
+					console.log({ vA, vB, oA, oB });
+
+					const uniqueStrs = [...new Set(oB)].filter(
+						(str) => typeof str === "string"
+					);
+					uniqueStrs.forEach((subF) => {
+						const subA = oA;
+						const subB = oB.map((b) => (b === subF ? 1 : 0));
+
+						const corr = getPointBiserialCorrelation(subB, subA);
+						corrs[fA][subF] = corr;
+					});
+				} else if (tA === "string" && tB === "string") {
+				} else if (tA === "string" && tB === "number") {
+				} else if (tA === "string" && tB === "object") {
+				} else if (tA === "object" && tB === "object") {
+				} else if (tA === "object" && tB === "number") {
+				} else if (tA === "object" && tB === "string") {
+				}
+			}
+		}
+		console.log({ corrs });
 	}
 
 	getAllCorrsForField(fieldA: string) {
