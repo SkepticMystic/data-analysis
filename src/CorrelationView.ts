@@ -42,9 +42,18 @@ export default class CorrelationView extends ItemView {
 		contentEl.empty();
 		contentEl.addClass("DA-corr-view");
 
-		contentEl.createEl("button", { text: "↻" }, (but) => {
-			but.onclick = async () => await this.draw();
-		});
+		contentEl.createEl(
+			"button",
+			{ text: "↻", attr: { "aria-label": "Refresh Index & Redraw" } },
+			(but) => {
+				but.onclick = async () => {
+					await this.plugin.refreshIndex(
+						this.app.plugins.plugins.dataview.api
+					);
+					await this.draw();
+				};
+			}
+		);
 
 		new Correlations({ target: contentEl, props: { view: this } });
 	}
