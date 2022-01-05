@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.7](https://github.com/SkepticMystic/data-analysis/compare/0.0.6...0.0.7) (2022-01-05)
+
+
+### Features
+
+* **WriteToCSV:** :sparkles: Working export to CSV! ([125591a](https://github.com/SkepticMystic/data-analysis/commit/125591affde47bf54961f2a528f462d2186866ba))
+
 ### [0.0.6](https://github.com/SkepticMystic/data-analysis/compare/0.0.5...0.0.6) (2022-01-04)
 
 
