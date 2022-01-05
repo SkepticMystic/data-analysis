@@ -11,6 +11,7 @@
 	const { corrs } = index;
 
 	let threshold = 0.5;
+	let absQ = false;
 	// let slider: HTMLElement;
 
 	// function createSlider(node) {
@@ -88,6 +89,10 @@
 			/>
 			Threashold: {threshold}
 		</label>
+		<label>
+			<input type="checkbox" bind:checked={absQ} />
+			|Abs|
+		</label>
 	</div>
 	<!-- <div class="slider" use:createSlider /> -->
 
@@ -101,15 +106,17 @@
 		</thead>
 
 		<tbody>
-			{#each corrsToShow as { fA, fB, corr }}
-				{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && corr >= threshold}
-					<tr>
-						<td>{fA}</td>
-						<td>{fB}</td>
-						<td>{corr.toFixed(4)}</td>
-					</tr>
-				{/if}
-			{/each}
+			{#key absQ}
+				{#each corrsToShow as { fA, fB, corr }}
+					{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && (absQ ? corr >= threshold || Math.abs(corr) >= threshold : corr >= threshold)}
+						<tr>
+							<td>{fA}</td>
+							<td>{fB}</td>
+							<td>{corr.toFixed(4)}</td>
+						</tr>
+					{/if}
+				{/each}
+			{/key}
 		</tbody>
 	</table>
 </div>
