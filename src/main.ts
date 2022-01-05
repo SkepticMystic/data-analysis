@@ -20,7 +20,8 @@ export default class DataAnalysisPlugin extends Plugin {
 		minDate: undefined,
 		maxDate: undefined,
 	};
-	unwrappedFields: string[] = [];
+	/* { foods: ["banana"] } */
+	unwrappedFields: { [field: string]: string[] } = {};
 
 	async onload() {
 		console.log("Loading data-analysis plugin");
@@ -132,29 +133,28 @@ export default class DataAnalysisPlugin extends Plugin {
 		const { unwrappedFields } = this;
 		const { fieldsToCheck } = this.settings;
 
-		data.forEach((d) => {
-			for (const field of fieldsToCheck) {
+		for (const field of fieldsToCheck) {
+			unwrappedFields[field] = [];
+			data.forEach((d) => {
 				const val = d[field];
 				if (val) {
 					if (typeof val === "string") {
-						const subField = field + "." + val;
-						d[field + "." + val] = true;
-						if (!unwrappedFields.includes(subField))
-							unwrappedFields.push(subField);
+						d[val] = true;
+						if (!unwrappedFields[field].includes(val))
+							unwrappedFields[field].push(val);
 					} else if (
 						val?.every &&
 						val.every((x: any) => typeof x === "string")
 					) {
 						val.forEach((str: string) => {
-							const subField = field + "." + str;
-							d[field + "." + str] = true;
-							if (!unwrappedFields.includes(subField))
-								unwrappedFields.push(subField);
+							d[str] = true;
+							if (!unwrappedFields[field].includes(str))
+								unwrappedFields[field].push(str);
 						});
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	async refreshIndex(dvApi: DataviewApi) {
 		const notice = new Notice("Index refreshing...");
