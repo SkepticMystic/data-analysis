@@ -44,11 +44,11 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
+		
 		const onAPIReady = async (api: DataviewApi) => {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex(api);
-				await this.buildAllCorrelations();
-				await openView(this.app, CORRELATION_VIEW, CorrelationView);
+				this.buildAllCorrelations();
 			});
 		};
 

@@ -77,7 +77,18 @@
 </script>
 
 <div class="component">
-	<input type="range" min="-1" max="1" step="0.01" bind:value={threshold} />
+	<div>
+		<label>
+			<input
+				type="range"
+				min="-1"
+				max="1"
+				step="0.01"
+				bind:value={threshold}
+			/>
+			Threashold: {threshold}
+		</label>
+	</div>
 	<!-- <div class="slider" use:createSlider /> -->
 
 	<table class="markdown-preview-view">

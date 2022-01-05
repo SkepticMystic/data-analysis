@@ -16,7 +16,6 @@ export default class CorrelationView extends ItemView {
 
 	async onload(): Promise<void> {
 		super.onload();
-		await this.draw();
 	}
 
 	getViewType() {
@@ -28,7 +27,9 @@ export default class CorrelationView extends ItemView {
 
 	icon = addFeatherIcon("trending-up") as string;
 
-	async onOpen(): Promise<void> {}
+	async onOpen(): Promise<void> {
+		await this.draw();
+	}
 
 	onClose(): Promise<void> {
 		this.view?.$destroy();
