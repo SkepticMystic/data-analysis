@@ -45,9 +45,11 @@ export default class DataAnalysisPlugin extends Plugin {
 		this.addSettingTab(new SettingTab(this.app, this));
 
 		const onAPIReady = async (api: DataviewApi) => {
-			await this.refreshIndex(api);
-			await this.buildAllCorrelations();
-			await openView(this.app, CORRELATION_VIEW, CorrelationView);
+			this.app.workspace.onLayoutReady(async () => {
+				await this.refreshIndex(api);
+				await this.buildAllCorrelations();
+				await openView(this.app, CORRELATION_VIEW, CorrelationView);
+			});
 		};
 
 		if (this.app.plugins.enabledPlugins.has("dataview")) {
@@ -120,7 +122,9 @@ export default class DataAnalysisPlugin extends Plugin {
 	}
 
 	onunload() {
-		this.app.workspace.detachLeavesOfType(CORRELATION_VIEW);
+		this.app.workspace
+			.getLeavesOfType(CORRELATION_VIEW)
+			.forEach((leaf) => leaf.detach());
 	}
 
 	unproxy(item: any): DataType[] {
