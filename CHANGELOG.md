@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.10](https://github.com/SkepticMystic/data-analysis/compare/0.0.9...0.0.10) (2022-01-05)
+
+
+### Fixes
+
+* **CorrelationView:** :bug: Don't open onLoad for now ([b814e20](https://github.com/SkepticMystic/data-analysis/commit/b814e2095e000954f94377f101f7942fae70c0e2))
+
 ### [0.0.9](https://github.com/SkepticMystic/data-analysis/compare/0.0.8...0.0.9) (2022-01-05)
 
 
