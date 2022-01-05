@@ -14,6 +14,8 @@ import {
 	stringToNullOrUndefined,
 } from "./utils";
 import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
+import CorrelationView from "./CorrelationView";
+import { openView } from "obsidian-community-lib";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
@@ -35,14 +37,23 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
+		const onAPIReady = async (api: DataviewApi) => {
+			await this.refreshIndex(api);
+			await this.buildAllCorrelations();
+			await openView(this.app, CORRELATION_VIEW, CorrelationView);
+		};
+
 		if (this.app.plugins.enabledPlugins.has("dataview")) {
 			const api = this.app.plugins.plugins.dataview?.api;
-			if (api) this.refreshIndex(api);
+			if (api) await onAPIReady(api);
 			else {
 				this.registerEvent(
-					this.app.metadataCache.on("dataview:api-ready", (api) => {
-						this.refreshIndex(api);
-					})
+					this.app.metadataCache.on(
+						"dataview:api-ready",
+						async (api) => {
+							await onAPIReady(api);
+						}
+					)
 				);
 			}
 		} else {
@@ -87,9 +98,23 @@ export default class DataAnalysisPlugin extends Plugin {
 				}
 			},
 		});
+
+		this.addCommand({
+			id: "open-correlation-view",
+			name: "Open Correlation View",
+			callback: async () =>
+				await openView(this.app, CORRELATION_VIEW, CorrelationView),
+		});
+
+		this.registerView(
+			CORRELATION_VIEW,
+			(leaf) => new CorrelationView(leaf, this)
+		);
 	}
 
-	onunload() {}
+	onunload() {
+		this.app.workspace.detachLeavesOfType(CORRELATION_VIEW);
+	}
 
 	unproxy(item: any): DataType[] {
 		const unproxied = [];

@@ -3,6 +3,7 @@
         "Analyses",
         "ChartModal",
         "StatsModal",
-        "WriteToCSV"
+        "WriteToCSV",
+        "CorrelationView"
     ]
 }
