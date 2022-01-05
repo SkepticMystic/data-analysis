@@ -283,14 +283,7 @@ export default class DataAnalysisPlugin extends Plugin {
 
 				if (tA === "number" && tB === "number") {
 					const [oA, oB] = arrayOverlap(vA, vB);
-					// Skip empty arrays
-					// Also can't get corr of one value
-					if (oA.length <= 1 || oB.length <= 1) {
-						corrs[fA][fB] = null;
-						continue;
-					}
-					const corr = getPearsonCorrelation(oA, oB);
-					corrs[fA][fB] = corr;
+					corrs[fA][fB] = getPearsonCorrelation(oA, oB);
 				} else if (tA === "number" && tB === "string") {
 					const oA = vA.filter((a) => a);
 					const oB = vB
@@ -305,7 +298,7 @@ export default class DataAnalysisPlugin extends Plugin {
 						const subB = oB.map((b) => (b === subF ? 1 : 0));
 
 						const corr = getPointBiserialCorrelation(subB, subA);
-						corrs[fA][subF] = corr;
+						corrs[fA][fB + "." + subF] = corr;
 					});
 				} else if (tA === "number" && tB === "object") {
 					const oA = vA.filter((a) => a);
@@ -321,16 +314,19 @@ export default class DataAnalysisPlugin extends Plugin {
 						const subB = oB.map((b) =>
 							b && b.includes(subF) ? 1 : 0
 						);
-
 						const corr = getPointBiserialCorrelation(subB, subA);
-						corrs[fA][subF] = corr;
+						corrs[fA][fB + "." + subF] = corr;
 					});
 				} else if (tA === "string" && tB === "string") {
+					corrs[fA][fB] = null;
 				} else if (tA === "string" && tB === "number") {
 				} else if (tA === "string" && tB === "object") {
+					corrs[fA][fB] = null;
 				} else if (tA === "object" && tB === "object") {
+					corrs[fA][fB] = null;
 				} else if (tA === "object" && tB === "number") {
 				} else if (tA === "object" && tB === "string") {
+					corrs[fA][fB] = null;
 				}
 			}
 		}
@@ -500,7 +496,6 @@ export default class DataAnalysisPlugin extends Plugin {
 				new Notice("Please choose a path to save to in settings");
 			} else {
 				try {
-					console.log("here");
 					const savePath = normalizePath(defaultSavePath);
 					const now = window.moment().format("YYYY-MM-DD HHmmss");
 

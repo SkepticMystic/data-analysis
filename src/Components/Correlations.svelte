@@ -2,6 +2,7 @@
 	import CorrelationView from "src/CorrelationView";
 	import noUiSlider from "nouislider";
 	import { onMount } from "svelte";
+	import { TFile } from "obsidian";
 
 	export let view: CorrelationView;
 
@@ -12,41 +13,64 @@
 	let threshold = 0.5;
 	// let slider: HTMLElement;
 
-	onMount(() => {
-		// noUiSlider.create(slider, {
-		// 	start: [20, 80],
-		// 	connect: true,
-		// 	range: {
-		// 		min: 0,
-		// 		max: 100,
-		// 	},
-		// });
-	});
+	// function createSlider(node) {
+	// 	noUiSlider.create(node, {
+	// 		start: [-threshold, +threshold],
+	// 		connect: true,
+	// 		range: {
+	// 			min: 0,
+	// 			max: 1,
+	// 		},
+	// 	});
+	// }
+
+	function updateFieldsInFile(currFile: TFile) {
+		const currPage = index.data.find(
+			(d) => d.file.name === currFile.basename
+		);
+		const fieldsInFile = Object.keys(currPage);
+
+		const { unwrappedFields } = plugin;
+		Object.keys(unwrappedFields).forEach((field) => {
+			if (fieldsInFile.includes(field)) {
+				unwrappedFields[field].forEach((subF) => {
+					if (
+						currPage[field].includes &&
+						currPage[field]?.includes(subF)
+					) {
+						fieldsInFile.push(field + "." + subF);
+					}
+				});
+			}
+		});
+		console.log({ fieldsInFile });
+		return fieldsInFile;
+	}
 
 	let currFile = app.workspace.getActiveFile();
+	let fieldsInFile = updateFieldsInFile(currFile);
+
 	plugin.registerEvent(
 		app.workspace.on("active-leaf-change", () => {
 			currFile = app.workspace.getActiveFile();
-			fieldsInFile = Object.keys(
-				index.data.find((d) => d.file.name === currFile.basename)
-			);
+			fieldsInFile = updateFieldsInFile(currFile);
 		})
 	);
-
-	let fieldsInFile = Object.keys(
-		index.data.find((d) => d.file.name === currFile.basename)
-	);
-	console.log({ fieldsInFile });
 
 	const fields = Object.keys(corrs);
 	const corrsToShow = fields
 		.map((fA) =>
-			fields.map((fB) => {
+			fieldsInFile.map((fB) => {
 				return { fA, fB, corr: corrs[fA][fB] };
 			})
 		)
 		.flat()
-		.filter((item) => item.corr)
+		.filter(
+			(item) =>
+				item.corr !== null &&
+				item.corr !== undefined &&
+				item.corr !== NaN
+		)
 		.sort((a, b) => b.corr - a.corr);
 
 	console.log({ corrsToShow });
@@ -54,7 +78,7 @@
 
 <div class="component">
 	<input type="range" min="-1" max="1" step="0.01" bind:value={threshold} />
-	<!-- <div class="slider" bind:this={slider} /> -->
+	<!-- <div class="slider" use:createSlider /> -->
 
 	<table class="markdown-preview-view">
 		<thead>
@@ -67,7 +91,7 @@
 
 		<tbody>
 			{#each corrsToShow as { fA, fB, corr }}
-				{#if fieldsInFile.includes(fA) && corr > threshold}
+				{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && corr >= threshold}
 					<tr>
 						<td>{fA}</td>
 						<td>{fB}</td>
