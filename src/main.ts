@@ -413,8 +413,7 @@ export default class DataAnalysisPlugin extends Plugin {
 				currRow["content"] = content;
 			}
 
-			for (const key of fieldsToCheck) {
-				// Process values
+			function updateCell(key: string, currRow: { [key: string]: any }) {
 				if (key !== "position") {
 					if (key !== "file" || addFileData) {
 						const value = page[key];
@@ -469,15 +468,35 @@ export default class DataAnalysisPlugin extends Plugin {
 				}
 			}
 
+			for (const key of fieldsToCheck) {
+				// Process values
+				updateCell(key, currRow);
+			}
+
+			const { unwrappedFields } = this;
+			for (const field in unwrappedFields) {
+				const val = page[field];
+				const subs = unwrappedFields[field];
+				if (val !== null && val !== undefined) {
+					subs.forEach((sub) => {
+						if (val.includes && val.includes(sub)) {
+							currRow[field + "." + sub] = 1;
+						}
+					});
+				} else {
+					subs.forEach((sub) => {
+						currRow[field + "." + sub] = 0;
+					});
+				}
+			}
+
 			yamldf.push(currRow);
 		}
-
-		let actualUndefinedValue = stringToNullOrUndefined(undefinedValue);
 
 		for (let i = 0; i < Object.keys(yamldf).length; i++) {
 			uniqueKeys.forEach((key) => {
 				if (yamldf[i][key] === undefined) {
-					yamldf[i][key] = actualUndefinedValue;
+					yamldf[i][key] = stringToNullOrUndefined(undefinedValue);
 				}
 			});
 		}
