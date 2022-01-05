@@ -117,9 +117,15 @@ export default class DataAnalysisPlugin extends Plugin {
 				if (splits.length === 1) return splits[0];
 				else return splits;
 			} else {
-				return unproxied[0];
+				if (unproxied[0].type === "file") {
+					return unproxied[0].path;
+				} else return unproxied[0];
 			}
-		} else return unproxied;
+		} else {
+			if (unproxied[0].type === "file") {
+				return unproxied.map((link) => link.path);
+			} else return unproxied;
+		}
 	}
 
 	unwrapStrLists(data: { [field: string]: any }[]) {
