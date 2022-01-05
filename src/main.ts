@@ -20,6 +20,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		minDate: undefined,
 		maxDate: undefined,
 	};
+	unwrappedFields: string[] = [];
 
 	async onload() {
 		console.log("Loading data-analysis plugin");
@@ -28,7 +29,6 @@ export default class DataAnalysisPlugin extends Plugin {
 		this.addSettingTab(new SettingTab(this.app, this));
 
 		if (this.app.plugins.enabledPlugins.has("dataview")) {
-			console.log("DataView plugin is enabled");
 			const api = this.app.plugins.plugins.dataview?.api;
 			if (api) this.refreshIndex(api);
 			else {
@@ -59,6 +59,11 @@ export default class DataAnalysisPlugin extends Plugin {
 			id: "stats-view",
 			name: "Open Stats Modal",
 			callback: async () => new StatsModal(this.app, this).open(),
+		});
+		this.addCommand({
+			id: "builds-corrs",
+			name: "Build Correlations",
+			callback: async () => console.log(this.buildAllCorrelations()),
 		});
 
 		this.addCommand({
@@ -117,6 +122,34 @@ export default class DataAnalysisPlugin extends Plugin {
 		} else return unproxied;
 	}
 
+	unwrapStrLists(data: { [field: string]: any }[]) {
+		const { unwrappedFields } = this;
+		const { fieldsToCheck } = this.settings;
+
+		data.forEach((d) => {
+			for (const field of fieldsToCheck) {
+				const val = d[field];
+				if (val) {
+					if (typeof val === "string") {
+						const subField = field + "." + val;
+						d[field + "." + val] = true;
+						if (!unwrappedFields.includes(subField))
+							unwrappedFields.push(subField);
+					} else if (
+						val?.every &&
+						val.every((x: any) => typeof x === "string")
+					) {
+						val.forEach((str: string) => {
+							const subField = field + "." + str;
+							d[field + "." + str] = true;
+							if (!unwrappedFields.includes(subField))
+								unwrappedFields.push(subField);
+						});
+					}
+				}
+			}
+		});
+	}
 	async refreshIndex(dvApi: DataviewApi) {
 		const notice = new Notice("Index refreshing...");
 		if (!dvApi) {
@@ -149,6 +182,9 @@ export default class DataAnalysisPlugin extends Plugin {
 				if (value) page[field] = this.getInnerValue(value);
 			});
 		});
+
+		this.unwrapStrLists(pages);
+
 		this.index = {
 			data: pages,
 			minDate: DateTime.min(...dates),
@@ -177,6 +213,15 @@ export default class DataAnalysisPlugin extends Plugin {
 	replaceMissing(xs: (string | number)[]) {
 		const type = this.inferType(xs);
 		return xs.map((x) => x ?? (type === "number" ? 0 : "N/A"));
+	}
+
+	buildAllCorrelations() {
+		const { data } = this.index;
+		const { fieldsToCheck } = this.settings;
+
+		const allFieldsToCheck = [...fieldsToCheck, this.unwrappedFields];
+
+		console.log({ data });
 	}
 
 	getAllCorrsForField(fieldA: string) {
