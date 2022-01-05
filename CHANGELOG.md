@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.12](https://github.com/SkepticMystic/data-analysis/compare/0.0.11...0.0.12) (2022-01-05)
+
+
+### Features
+
+* **WriteToCSV:** :sparkles: Integrate nested fields ([6d70ee9](https://github.com/SkepticMystic/data-analysis/commit/6d70ee931170f91142f2cd21716ea6924a4d47d2))
+
 ### [0.0.11](https://github.com/SkepticMystic/data-analysis/compare/0.0.10...0.0.11) (2022-01-05)
 
 
