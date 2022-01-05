@@ -29,3 +29,9 @@ export function arrayOverlap<T>(A: T[], B: T[]): [T[], T[]] {
 	if (!aOverlap.length || !bOverlap.length) return [[], []];
 	return [aOverlap, bOverlap];
 }
+
+export const toKebabCase = (input: string) =>
+	input
+		.replace(/([a-z])([A-Z])/g, "$1-$2")
+		.replace(/[\s_]+/g, "-")
+		.toLowerCase();

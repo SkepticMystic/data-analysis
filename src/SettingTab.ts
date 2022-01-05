@@ -1,7 +1,7 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import { DEFAULT_SETTINGS } from "./const";
 import DataAnalysisPlugin from "./main";
-import { splitAndTrim } from "./utils";
+import { splitAndTrim, toKebabCase } from "./utils";
 
 export class SettingTab extends PluginSettingTab {
 	plugin: DataAnalysisPlugin;
@@ -43,7 +43,10 @@ export class SettingTab extends PluginSettingTab {
 						for (const field in page) {
 							if (
 								typeof page[field] === "number" &&
-								!settings.fieldsToCheck.includes(field)
+								!settings.fieldsToCheck.includes(field) &&
+								!settings.fieldsToCheck
+									.map((field) => toKebabCase(field))
+									.includes(field)
 							) {
 								settings.fieldsToCheck.push(field);
 								await plugin.saveSettings();
