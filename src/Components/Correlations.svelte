@@ -1,6 +1,5 @@
 <script lang="ts">
 	import noUiSlider, { API } from "nouislider";
-	import "nouislider/dist/nouislider.css";
 	import { TFile } from "obsidian";
 	import CorrelationView from "src/CorrelationView";
 
@@ -10,6 +9,7 @@
 	const { index } = plugin;
 	const { corrs } = index;
 
+	
 	let upper = 0.5;
 	let lower = -1;
 	let absQ = false;
@@ -126,8 +126,8 @@
 	}
 
 	div.slider {
-		width: 100px;
-		height: 20px;
+		width: 150px;
+		height: 10px;
 		display: inline-block;
 	}
 	table {
