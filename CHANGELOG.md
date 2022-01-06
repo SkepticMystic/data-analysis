@@ -1,4 +1,17 @@
 ## Changelog
+### [0.0.15](https://github.com/SkepticMystic/data-analysis/compare/0.0.14...0.0.15) (2022-01-06)
+
+
+### Features
+
+* **Analyses:** :sparkles: Ability to skip test if isQuant has been checked externally ([55fa850](https://github.com/SkepticMystic/data-analysis/commit/55fa850df36da34e2eee460d4323b3bc01fbd82b))
+* **CorrelationView:** :sparkles: Working double slider! ([b920e60](https://github.com/SkepticMystic/data-analysis/commit/b920e60f976950eb8b500b491a79e50feb3ed81f))
+
+
+### Fixes
+
+* **ChartModal:** :bug: Don't filter out 0's (fix [#4](https://github.com/SkepticMystic/data-analysis/issues/4)) ([0811031](https://github.com/SkepticMystic/data-analysis/commit/08110315e4e10e4faf6ed2dee0744731e50e5753))
+
 ### [0.0.14](https://github.com/SkepticMystic/data-analysis/compare/0.0.13...0.0.14) (2022-01-05)
 
 
