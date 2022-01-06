@@ -1,8 +1,8 @@
 <script lang="ts">
-	import CorrelationView from "src/CorrelationView";
-	import noUiSlider from "nouislider";
-	import { onMount } from "svelte";
+	import noUiSlider, { API } from "nouislider";
+	import "nouislider/dist/nouislider.css";
 	import { TFile } from "obsidian";
+	import CorrelationView from "src/CorrelationView";
 
 	export let view: CorrelationView;
 
@@ -10,20 +10,25 @@
 	const { index } = plugin;
 	const { corrs } = index;
 
-	let threshold = 0.5;
+	let upper = 0.5;
+	let lower = -1;
 	let absQ = false;
-	// let slider: HTMLElement;
+	let slider: API;
 
-	// function createSlider(node) {
-	// 	noUiSlider.create(node, {
-	// 		start: [-threshold, +threshold],
-	// 		connect: true,
-	// 		range: {
-	// 			min: 0,
-	// 			max: 1,
-	// 		},
-	// 	});
-	// }
+	function createSlider(node) {
+		slider = noUiSlider.create(node, {
+			start: [lower, upper],
+			connect: true,
+			range: {
+				min: -1,
+				max: 1,
+			},
+		});
+		slider.on("update", (e) => {
+			lower = Number.parseFloat(e[0]);
+			upper = Number.parseFloat(e[1]);
+		});
+	}
 
 	function updateFieldsInFile(currFile: TFile) {
 		const currPage = index.data.find(
@@ -79,22 +84,16 @@
 
 <div class="component">
 	<div>
+		<!-- svelte-ignore a11y-label-has-associated-control -->
 		<label>
-			<input
-				type="range"
-				min="-1"
-				max="1"
-				step="0.01"
-				bind:value={threshold}
-			/>
-			Threashold: {threshold}
+			<div class="slider" use:createSlider />
+			({lower}) ↔ ({upper})
 		</label>
 		<label>
 			<input type="checkbox" bind:checked={absQ} />
 			|Abs|
 		</label>
 	</div>
-	<!-- <div class="slider" use:createSlider /> -->
 
 	<table class="markdown-preview-view">
 		<thead>
@@ -108,7 +107,7 @@
 		<tbody>
 			{#key absQ}
 				{#each corrsToShow as { fA, fB, corr }}
-					{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && (absQ ? corr >= threshold || Math.abs(corr) >= threshold : corr >= threshold)}
+					{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && lower <= corr && corr <= upper}
 						<tr>
 							<td>{fA}</td>
 							<td>{fB}</td>
@@ -129,6 +128,7 @@
 	div.slider {
 		width: 100px;
 		height: 20px;
+		display: inline-block;
 	}
 	table {
 		border-collapse: collapse;
