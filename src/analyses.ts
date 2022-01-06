@@ -4,8 +4,18 @@
  * @param {arraytype} ys - the array of y values
  * @returns The correlation coefficient.
  */
-export function getPearsonCorrelation(xs: number[], ys: number[]) {
-	if (xs.length <= 1 || ys.length <= 1 || !isQuant(xs) || !isQuant(ys))
+export function getPearsonCorrelation(
+	xs: number[],
+	ys: number[],
+	skipTest = false
+) {
+	if (
+		xs.length <= 1 ||
+		ys.length <= 1 ||
+		skipTest ||
+		!isQuant(xs) ||
+		!isQuant(ys)
+	)
 		return null;
 
 	const n = xs.length;
