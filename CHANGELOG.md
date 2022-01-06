@@ -1,4 +1,6 @@
 ## Changelog
+### [0.0.16](https://github.com/SkepticMystic/data-analysis/compare/0.0.15...0.0.16) (2022-01-06)
+
 ### [0.0.15](https://github.com/SkepticMystic/data-analysis/compare/0.0.14...0.0.15) (2022-01-06)
 
 
