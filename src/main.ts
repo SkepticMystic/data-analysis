@@ -48,7 +48,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		const onAPIReady = async (api: DataviewApi) => {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex(api);
-				this.buildAllCorrelations();
+				this.index.corrs = this.buildAllCorrelations();
 			});
 		};
 
@@ -335,59 +335,59 @@ export default class DataAnalysisPlugin extends Plugin {
 			}
 		}
 		console.log({ corrs });
-		this.index.corrs = corrs;
+		return corrs;
 	}
 
-	getAllCorrsForField(fieldA: string) {
-		const { data } = this.index;
-		const { fieldsToCheck } = this.settings;
-		const correlations = {};
+	// getAllCorrsForField(fieldA: string) {
+	// 	const { data } = this.index;
+	// 	const { fieldsToCheck } = this.settings;
+	// 	const correlations = {};
 
-		const fieldsForA = this.allUniqueValuesForField(fieldA);
+	// 	const fieldsForA = this.allUniqueValuesForField(fieldA);
 
-		fieldsToCheck.forEach((fieldB) => {
-			const fieldsForB = this.allUniqueValuesForField(fieldB);
+	// 	fieldsToCheck.forEach((fieldB) => {
+	// 		const fieldsForB = this.allUniqueValuesForField(fieldB);
 
-			const valsInCommon: {
-				[fieldA: string]: {
-					[fieldB: string]: [
-						string | number | string[],
-						string | number | string[]
-					];
-				};
-			} = {};
+	// 		const valsInCommon: {
+	// 			[fieldA: string]: {
+	// 				[fieldB: string]: [
+	// 					string | number | string[],
+	// 					string | number | string[]
+	// 				];
+	// 			};
+	// 		} = {};
 
-			if (!valsInCommon.hasOwnProperty(fieldA)) {
-				valsInCommon[fieldA] = {};
-			}
-			const valsA = data.map((d) => d[fieldA]);
-			const valsB = data.map((d) => d[fieldB]);
+	// 		if (!valsInCommon.hasOwnProperty(fieldA)) {
+	// 			valsInCommon[fieldA] = {};
+	// 		}
+	// 		const valsA = data.map((d) => d[fieldA]);
+	// 		const valsB = data.map((d) => d[fieldB]);
 
-			valsA.forEach((valA) => {
-				if (typeof valA === "string") {
-					// valsInCommon[fieldA + valA] = valA;
-				}
-			});
-			valsInCommon[fieldA][fieldB] = [valsA, valsB];
+	// 		valsA.forEach((valA) => {
+	// 			if (typeof valA === "string") {
+	// 				// valsInCommon[fieldA + valA] = valA;
+	// 			}
+	// 		});
+	// 		valsInCommon[fieldA][fieldB] = [valsA, valsB];
 
-			// for (const fieldA in valsInCommon) {
-			// 	for (const fieldB in valsInCommon) {
-			// 		const [valA, valB] = valsInCommon[fieldA][fieldB];
-			// 		[valA, valB].forEach((val, i) => {
-			// 			const arr = makeArr(val);
-			// 			if (typeof arr[0] === "string") {
-			// 				valsInCommon[fieldA][fieldB][i] = arr.map((x) => {
-			// 					if (i === 0)
-			// 						return fieldsForA.includes(x) ? 1 : 0;
-			// 					else return fieldsForB.includes(x) ? 1 : 0;
-			// 				});
-			// 			}
-			// 		});
-			// 	}
-			// }
-			console.log(valsInCommon);
-		});
-	}
+	// 		// for (const fieldA in valsInCommon) {
+	// 		// 	for (const fieldB in valsInCommon) {
+	// 		// 		const [valA, valB] = valsInCommon[fieldA][fieldB];
+	// 		// 		[valA, valB].forEach((val, i) => {
+	// 		// 			const arr = makeArr(val);
+	// 		// 			if (typeof arr[0] === "string") {
+	// 		// 				valsInCommon[fieldA][fieldB][i] = arr.map((x) => {
+	// 		// 					if (i === 0)
+	// 		// 						return fieldsForA.includes(x) ? 1 : 0;
+	// 		// 					else return fieldsForB.includes(x) ? 1 : 0;
+	// 		// 				});
+	// 		// 			}
+	// 		// 		});
+	// 		// 	}
+	// 		// }
+	// 		console.log(valsInCommon);
+	// 	});
+	// }
 
 	async createJSDF() {
 		const { settings } = this;

@@ -37,7 +37,7 @@ export default class CorrelationView extends ItemView {
 	}
 
 	async draw(): Promise<void> {
-		const { contentEl } = this;
+		const { contentEl, plugin } = this;
 
 		contentEl.empty();
 		contentEl.addClass("DA-corr-view");
@@ -47,9 +47,10 @@ export default class CorrelationView extends ItemView {
 			{ text: "↻", attr: { "aria-label": "Refresh Index & Redraw" } },
 			(but) => {
 				but.onclick = async () => {
-					await this.plugin.refreshIndex(
+					await plugin.refreshIndex(
 						this.app.plugins.plugins.dataview.api
 					);
+					plugin.index.corrs = plugin.buildAllCorrelations();
 					await this.draw();
 				};
 			}

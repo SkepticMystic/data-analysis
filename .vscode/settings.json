@@ -4,6 +4,7 @@
         "ChartModal",
         "StatsModal",
         "WriteToCSV",
-        "CorrelationView"
+        "CorrelationView",
+        "Index"
     ]
 }
