@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { ChartModal } from "src/ChartModal";
-	import Checkboxes from "./Checkboxes.svelte";
-	import ChartOptions from "./ChartOptions.svelte";
-	import Scatter from "svelte-chartjs/src/Scatter.svelte";
-	import { getPearsonCorrelation } from "src/analyses";
 	import { DateTime } from "obsidian-dataview";
+	import { getPearsonCorrelation } from "src/analyses";
+	import { ChartModal } from "src/ChartModal";
+	import Scatter from "svelte-chartjs/src/Scatter.svelte";
+	import ChartOptions from "./ChartOptions.svelte";
 
 	export let modal: ChartModal;
 
@@ -56,7 +55,7 @@
 				};
 			})
 			.filter((point) => {
-				return point.x && point.y;
+				return point.x !== undefined && point.y !== undefined;
 			});
 		return innerData;
 	}
@@ -66,11 +65,11 @@
 		second: string,
 		innerData: Datum2d[]
 	) {
+		const xs = innerData.map((p) => p.x);
+		const ys = innerData.map((p) => p.y);
+
 		return isValidSelection(first, second)
-			? getPearsonCorrelation(
-					innerData.map((p) => p.x),
-					innerData.map((p) => p.y)
-			  )
+			? getPearsonCorrelation(xs, ys)
 			: null;
 	}
 
