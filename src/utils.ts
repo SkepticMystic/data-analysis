@@ -2,6 +2,7 @@ import { Menu } from "obsidian";
 import { ChartModal } from "./ChartModal";
 import { DECIMALS } from "./const";
 import DataAnalysisPlugin from "./main";
+import { StatsModal } from "./StatsModal";
 
 export const splitAndTrim = (fields: string): string[] => {
 	if (fields === "") return [];
@@ -80,6 +81,15 @@ export function menuForChartNStatsModal(
 				).open();
 			})
 	);
-
+	if (!(typeof clickedCellText === "number")) {
+		menu.addItem((item) =>
+			item
+				.setTitle("Open Stats Modal")
+				.setIcon(addFeatherIcon("grid") as string)
+				.onClick(() => {
+					new StatsModal(app, plugin, clickedCellText).open();
+				})
+		);
+	}
 	menu.showAtMouseEvent(event);
 }

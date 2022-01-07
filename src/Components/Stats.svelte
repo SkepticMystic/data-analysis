@@ -9,12 +9,12 @@
 	const { index, settings } = plugin;
 	const { fieldsToCheck } = settings;
 
-	let field = "";
+	let { f1 } = modal;
 
 	const updateData = (field: string) =>
 		index.data.map((d) => d[field]).filter((d) => d);
 
-	$: data = updateData(field);
+	$: data = updateData(f1);
 	$: n = data.length;
 	$: mean = getMean(data);
 	$: median = getMedian(data);
@@ -37,7 +37,7 @@
 </datalist>
 <label for="fields">
 	Field:
-	<input bind:value={field} list="fields" />
+	<input bind:value={f1} list="fields" />
 </label>
 
 <table>
