@@ -9,7 +9,7 @@ import {
 	dropHeaderOrAlias,
 	splitLinksRegex,
 } from "./const";
-import { DataType, Settings } from "./interfaces";
+import { Correlations, DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
 import {
@@ -27,7 +27,7 @@ export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
 	index: {
 		data: { [field: string]: DataType }[];
-		corrs: { [field: string]: { [field: string]: number } };
+		corrs: Correlations;
 		minDate: DateTime;
 		maxDate: DateTime;
 	} = {
@@ -274,7 +274,7 @@ export default class DataAnalysisPlugin extends Plugin {
 	buildAllCorrelations() {
 		const { data } = this.index;
 		const { fieldsToCheck } = this.settings;
-		const corrs: { [fA: string]: { [fB: string]: number } } = {};
+		const corrs: Correlations = {};
 
 		for (const fA of fieldsToCheck) {
 			corrs[fA] = {};
@@ -287,7 +287,8 @@ export default class DataAnalysisPlugin extends Plugin {
 
 				if (tA === "number" && tB === "number") {
 					const [oA, oB] = arrayOverlap(vA, vB);
-					corrs[fA][fB] = getPearsonCorrelation(oA, oB);
+					const corr = getPearsonCorrelation(oA, oB);
+					corrs[fA][fB] = corr ? { corr, n: oA.length } : null;
 				} else if (tA === "number" && tB === "string") {
 					const oA = vA.filter((a) => a);
 					const oB = vB
@@ -302,7 +303,9 @@ export default class DataAnalysisPlugin extends Plugin {
 						const subB = oB.map((b) => (b === subF ? 1 : 0));
 
 						const corr = getPointBiserialCorrelation(subB, subA);
-						corrs[fA][fB + "." + subF] = corr;
+						corrs[fA][fB + "." + subF] = corr
+							? { corr, n: subA.length }
+							: null;
 					});
 				} else if (tA === "number" && tB === "object") {
 					const oA = vA.filter((a) => a);
@@ -319,7 +322,9 @@ export default class DataAnalysisPlugin extends Plugin {
 							b && b.includes(subF) ? 1 : 0
 						);
 						const corr = getPointBiserialCorrelation(subB, subA);
-						corrs[fA][fB + "." + subF] = corr;
+						corrs[fA][fB + "." + subF] = corr
+							? { corr, n: subA.length }
+							: null;
 					});
 				} else if (tA === "string" && tB === "string") {
 					corrs[fA][fB] = null;
