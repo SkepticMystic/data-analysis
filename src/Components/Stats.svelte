@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getMean, getMedian, getMode, getStdDev } from "src/analyses";
+	import { getMean, getMedian, getMode, getStdDev } from "../analyses";
+	import { roundNumber } from "../utils";
 	import { StatsModal } from "../StatsModal";
 
 	export let modal: StatsModal;
@@ -8,7 +9,7 @@
 	const { index, settings } = plugin;
 	const { fieldsToCheck } = settings;
 
-	let field = fieldsToCheck[0];
+	let field = "";
 
 	const updateData = (field: string) =>
 		index.data.map((d) => d[field]).filter((d) => d);
@@ -22,8 +23,10 @@
 
 	$: stats = [
 		n ? ["n", n] : null,
+		mean ? ["Mean", roundNumber(mean)] : null,
+		median ? ["Median", roundNumber(median)] : null,
 		["Mode", mode],
-		std ? ["Std Dev.", std?.toFixed(4)] : null,
+		std ? ["Std Dev.", roundNumber(std)] : null,
 	];
 </script>
 

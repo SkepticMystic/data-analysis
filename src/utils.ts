@@ -1,3 +1,5 @@
+import { DECIMALS } from "./const";
+
 export const splitAndTrim = (fields: string): string[] => {
 	if (fields === "") return [];
 	else return fields.split(",").map((str) => str.trim());
@@ -38,3 +40,6 @@ export const toKebabCase = (input: string) =>
 		.replace(/([a-z])([A-Z])/g, "$1-$2")
 		.replace(/[\s_]+/g, "-")
 		.toLowerCase();
+
+export const roundNumber = (num: number, dec: number = DECIMALS): number =>
+	Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
