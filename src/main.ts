@@ -180,6 +180,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			data.forEach((d) => {
 				const val = d[field];
 				if (val) {
+					// BUG: Don't do this for _every_ string
 					if (typeof val === "string") {
 						d[val] = true;
 						if (!unwrappedFields[field].includes(val))
