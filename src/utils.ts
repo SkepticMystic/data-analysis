@@ -1,4 +1,7 @@
+import { Menu } from "obsidian";
+import { ChartModal } from "./ChartModal";
 import { DECIMALS } from "./const";
+import DataAnalysisPlugin from "./main";
 
 export const splitAndTrim = (fields: string): string[] => {
 	if (fields === "") return [];
@@ -43,3 +46,40 @@ export const toKebabCase = (input: string) =>
 
 export const roundNumber = (num: number, dec: number = DECIMALS): number =>
 	Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
+
+export const tryParseNumber = (input: string): number | string => {
+	const num = Number.parseFloat(input);
+	return isNaN(num) ? input : num;
+};
+
+export function menuForChartNStatsModal(
+	event: MouseEvent,
+	plugin: DataAnalysisPlugin
+) {
+	const { app } = plugin;
+	const menu = new Menu(app);
+	const { target } = event;
+	const { parentElement } = target;
+
+	const clickedCellText = tryParseNumber(target.innerText);
+
+	const allCellTexts = [...parentElement.cells].map(
+		(el: HTMLTableCellElement) => tryParseNumber(el.textContent)
+	) as [string, string, number];
+
+	menu.addItem((item) =>
+		item
+			.setTitle("Open Chart Modal")
+			.setIcon("documents")
+			.onClick(() => {
+				new ChartModal(
+					app,
+					plugin,
+					allCellTexts[0],
+					allCellTexts[1]
+				).open();
+			})
+	);
+
+	menu.showAtMouseEvent(event);
+}

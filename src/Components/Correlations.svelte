@@ -1,7 +1,8 @@
 <script lang="ts">
 	import noUiSlider, { API } from "nouislider";
 	import { TFile } from "obsidian";
-	import CorrelationView from "src/CorrelationView";
+	import CorrelationView from "../CorrelationView";
+	import { menuForChartNStatsModal } from "../utils";
 
 	export let view: CorrelationView;
 
@@ -108,6 +109,8 @@
 						<tr
 							aria-label={n ? "n: " + n.toFixed() : ""}
 							aria-label-position="left"
+							on:contextmenu={(e) =>
+								menuForChartNStatsModal(e, plugin)}
 						>
 							<td>{fA}</td>
 							<td>{fB}</td>
