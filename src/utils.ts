@@ -1,4 +1,5 @@
 import { Menu } from "obsidian";
+import { addFeatherIcon } from "obsidian-community-lib";
 import { ChartModal } from "./ChartModal";
 import { DECIMALS } from "./const";
 import DataAnalysisPlugin from "./main";
@@ -71,7 +72,7 @@ export function menuForChartNStatsModal(
 	menu.addItem((item) =>
 		item
 			.setTitle("Open Chart Modal")
-			.setIcon("documents")
+			.setIcon(addFeatherIcon("bar-chart-2") as string)
 			.onClick(() => {
 				new ChartModal(
 					app,
