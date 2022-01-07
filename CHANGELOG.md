@@ -1,4 +1,18 @@
 ## Changelog
+### [0.0.17](https://github.com/SkepticMystic/data-analysis/compare/0.0.16...0.0.17) (2022-01-07)
+
+
+### Features
+
+* :sparkles: roundNumber better than .toFixed() ([85eed96](https://github.com/SkepticMystic/data-analysis/commit/85eed9641ff2d0171332bb93a21a299ac5da3743))
+* **ChartModal:** :sparkles: Show sample size ([c20c3fa](https://github.com/SkepticMystic/data-analysis/commit/c20c3fae8979b119752e96ba49657045df98ec39))
+* **StatsModal:** :sparkles: Show sample size as row ([f0dff55](https://github.com/SkepticMystic/data-analysis/commit/f0dff559cb4e6fc73b7e32fde63ceff02670b3bf))
+
+
+### Documentation
+
+* :memo: Add documentation on CorrelationView and Development ([cf499c8](https://github.com/SkepticMystic/data-analysis/commit/cf499c888bbde40202a05aa80594a98fa3638182))
+
 ### [0.0.16](https://github.com/SkepticMystic/data-analysis/compare/0.0.15...0.0.16) (2022-01-06)
 
 ### [0.0.15](https://github.com/SkepticMystic/data-analysis/compare/0.0.14...0.0.15) (2022-01-06)
