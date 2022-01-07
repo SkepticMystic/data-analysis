@@ -14,14 +14,14 @@
 		index.data.map((d) => d[field]).filter((d) => d);
 
 	$: data = updateData(field);
+	$: n = data.length;
 	$: mean = getMean(data);
 	$: median = getMedian(data);
 	$: mode = getMode(data);
 	$: std = getStdDev(data);
 
 	$: stats = [
-		mean ? ["Mean", mean] : null,
-		median ? ["Median", median] : null,
+		n ? ["n", n] : null,
 		["Mode", mode],
 		std ? ["Std Dev.", std?.toFixed(4)] : null,
 	];
