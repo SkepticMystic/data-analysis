@@ -286,6 +286,7 @@ export default class DataAnalysisPlugin extends Plugin {
 				const tB = this.inferType(vB);
 
 				if (tA === "number" && tB === "number") {
+					if (corrs[fB]?.[fA]) continue;
 					const [oA, oB] = arrayOverlap(vA, vB);
 					const corr = getPearsonCorrelation(oA, oB);
 					corrs[fA][fB] = corr ? { corr, n: oA.length } : null;

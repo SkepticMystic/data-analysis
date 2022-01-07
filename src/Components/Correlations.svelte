@@ -10,8 +10,7 @@
 	const { index } = plugin;
 	const { corrs } = index;
 
-	let upper = 0.5;
-	let lower = -1;
+	let [lower, upper] = [-1, 0.5];
 	let absQ = false;
 	let slider: API;
 
