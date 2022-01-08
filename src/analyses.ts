@@ -7,14 +7,14 @@
 export function getPearsonCorrelation(
 	xs: number[],
 	ys: number[],
-	skipTest = false
+	skipQuantCheck = false
 ) {
+	if (xs.length <= 1 || ys.length <= 1)
+		return null;
+
 	if (
-		xs.length <= 1 ||
-		ys.length <= 1 ||
-		skipTest ||
-		!isQuant(xs) ||
-		!isQuant(ys)
+		!skipQuantCheck &&
+		(!isQuant(xs) || !isQuant(ys))
 	)
 		return null;
 

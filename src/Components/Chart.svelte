@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DateTime } from "obsidian-dataview";
-	import { getPearsonCorrelation } from "src/analyses";
+	import { getPearsonCorrelation, isQuant } from "src/analyses";
 	import { ChartModal } from "src/ChartModal";
 	import Scatter from "svelte-chartjs/src/Scatter.svelte";
 	import ChartOptions from "./ChartOptions.svelte";
@@ -19,6 +19,7 @@
 	let startDate = index.minDate;
 	let endDate = index.maxDate;
 	let dnOnly = false;
+	let errorMessage = "";
 
 	interface Datum2d {
 		x: number;
@@ -65,7 +66,23 @@
 		const xs = innerData.map((p) => p.x);
 		const ys = innerData.map((p) => p.y);
 
-		return isValidSelection(f1, f2) ? getPearsonCorrelation(xs, ys) : null;
+		if (isValidSelection(f1, f2)) {
+			const xValid = isQuant(xs)
+			const yValid = isQuant(ys)
+			if (!xValid && !yValid) {
+				errorMessage = "Both fields have non-numeric values.";
+				return null;
+			} else if (!xValid) {
+				errorMessage = "First field has non-numeric values.";
+				return null;
+			} else if (!yValid) {
+				errorMessage = "Second field has non-numeric values.";
+				return null;
+			}
+			errorMessage = "";
+			return getPearsonCorrelation(xs, ys, true);
+		}
+		return null; 
 	}
 
 	function refreshChartData(colour: string, innerData: Datum2d[]) {
@@ -153,7 +170,9 @@
 <Scatter {data} options={chartOptions} />
 
 <div class="measures">
-	{#if isValidSelection(f1, f2)}
+	{#if errorMessage != ""}
+		<span>Error: {errorMessage}</span>
+	{:else if isValidSelection(f1, f2)}
 		<span>
 			<span class="measure-name">n:</span>
 			<span class="measure-value">{innerData.length}</span>
