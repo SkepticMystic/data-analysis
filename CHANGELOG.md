@@ -1,4 +1,19 @@
 ## Changelog
+### [0.0.18](https://github.com/SkepticMystic/data-analysis/compare/0.0.17...0.0.18) (2022-01-08)
+
+
+### Features
+
+* **CorrelationView:** :sparkles: Right click to open ChartModal on currently selected row ([a33af7c](https://github.com/SkepticMystic/data-analysis/commit/a33af7ce20edd32e1c61d55018637975a300985a))
+* **CorrelationView:** :sparkles: Right click to open StatsModal (only if selected cell is a field, not a number) ([7328d18](https://github.com/SkepticMystic/data-analysis/commit/7328d18acd2b0b49aed0f46bb1b00adeb1afe0c2))
+* **CorrelationView:** :sparkles: Show sample size as tooltip ([8341e4e](https://github.com/SkepticMystic/data-analysis/commit/8341e4e67f25ff1160ac15c06cf2ae11718d30f5))
+
+
+### Fixes
+
+* **ChartModal:** :bug: Display descriptive error message if selected correlation fields do not contain all numeric values ([0e64b51](https://github.com/SkepticMystic/data-analysis/commit/0e64b51aa9fe0e7227e2706d9afc61678ad99e12)), closes [#13](https://github.com/SkepticMystic/data-analysis/issues/13)
+* **CorrelationView:** :bug: Avoid duplicate correlations by never adding them in the first place ([6e55fc6](https://github.com/SkepticMystic/data-analysis/commit/6e55fc6be9f3b42ac8ff64e419d630568b3b442a))
+
 ### [0.0.17](https://github.com/SkepticMystic/data-analysis/compare/0.0.16...0.0.17) (2022-01-07)
 
 
