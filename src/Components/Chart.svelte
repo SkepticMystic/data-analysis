@@ -6,13 +6,13 @@
 	import ChartOptions from "./ChartOptions.svelte";
 
 	export let modal: ChartModal;
+	let { f1, f2 } = modal;
 
 	const { app, plugin } = modal;
 	const { index, settings } = plugin;
 	const { fieldsToCheck } = settings;
 
 	let allFields = fieldsToCheck;
-	let [f1, f2] = ["", ""];
 	let [n1, n2] = [0, 0];
 
 	let colour = "#15a252";

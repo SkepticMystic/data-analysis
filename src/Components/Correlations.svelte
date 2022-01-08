@@ -1,7 +1,8 @@
 <script lang="ts">
 	import noUiSlider, { API } from "nouislider";
 	import { TFile } from "obsidian";
-	import CorrelationView from "src/CorrelationView";
+	import CorrelationView from "../CorrelationView";
+	import { menuForChartNStatsModal } from "../utils";
 
 	export let view: CorrelationView;
 
@@ -9,7 +10,6 @@
 	const { index } = plugin;
 	const { corrs } = index;
 
-	
 	let upper = 0.5;
 	let lower = -1;
 	let absQ = false;
@@ -67,17 +67,15 @@
 	const corrsToShow = fields
 		.map((fA) =>
 			fieldsInFile.map((fB) => {
-				return { fA, fB, corr: corrs[fA][fB] };
+				return { fA, fB, info: corrs[fA][fB] };
 			})
 		)
 		.flat()
-		.filter(
-			(item) =>
-				item.corr !== null &&
-				item.corr !== undefined &&
-				item.corr !== NaN
-		)
-		.sort((a, b) => b.corr - a.corr);
+		.filter((item) => {
+			const { info } = item;
+			return info && info.corr !== NaN;
+		})
+		.sort((a, b) => b.info.corr - a.info.corr);
 
 	console.log({ corrsToShow });
 </script>
@@ -106,9 +104,14 @@
 
 		<tbody>
 			{#key absQ}
-				{#each corrsToShow as { fA, fB, corr }}
+				{#each corrsToShow as { fA, fB, info: { corr, n } }}
 					{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && lower <= corr && corr <= upper}
-						<tr>
+						<tr
+							aria-label={n ? "n: " + n.toFixed() : ""}
+							aria-label-position="left"
+							on:contextmenu={(e) =>
+								menuForChartNStatsModal(e, plugin)}
+						>
 							<td>{fA}</td>
 							<td>{fB}</td>
 							<td>{corr.toFixed(4)}</td>
