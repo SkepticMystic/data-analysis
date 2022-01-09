@@ -24,19 +24,15 @@ export function stringToNullOrUndefined(current: string) {
 }
 
 export function arrayOverlap<T>(A: T[], B: T[]): [T[], T[]] {
-	const iA: number[] = [];
-	A.forEach((a, i) => {
-		if (a !== undefined) iA.push(i);
-	});
-	const iB: number[] = [];
-	B.forEach((b, i) => {
-		if (b !== undefined) iB.push(i);
-	});
+	if (A.length !== B.length) return [[], []];
 
-	const aOverlap = A.filter((a, i) => iA.includes(i) && iB.includes(i));
-	const bOverlap = B.filter((b, i) => iA.includes(i) && iB.includes(i));
+	const iA = A.filter((a) => a !== undefined).map((a, i) => i);
+	const iB = B.filter((b) => b !== undefined).map((b, i) => i);
+	const iOverlap = iA.filter((i) => iB.includes(i));
 
-	if (!aOverlap.length || !bOverlap.length) return [[], []];
+	const aOverlap = A.filter((a, i) => iOverlap.includes(i));
+	const bOverlap = B.filter((b, i) => iOverlap.includes(i));
+
 	return [aOverlap, bOverlap];
 }
 
