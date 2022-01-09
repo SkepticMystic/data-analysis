@@ -22,3 +22,7 @@ export interface Settings {
 }
 
 export type DataType = number | string | Date | Link;
+
+export interface Row {
+	[col: string]: any;
+}

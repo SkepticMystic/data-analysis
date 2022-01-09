@@ -9,7 +9,7 @@ import {
 	dropHeaderOrAlias,
 	splitLinksRegex,
 } from "./const";
-import { Correlations, DataType, Settings } from "./interfaces";
+import { Correlations, DataType, Row, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
 import {
@@ -409,7 +409,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			fieldsToCheck,
 		} = settings;
 
-		let yamldf: { [key: string]: any }[] = [];
+		let table: Row[] = [];
 		let uniqueKeys: string[] = [];
 
 		let actualNullValue = stringToNullOrUndefined(nullValue);
@@ -424,65 +424,59 @@ export default class DataAnalysisPlugin extends Plugin {
 				currRow["content"] = content;
 			}
 
-			function updateCell(key: string, currRow: { [key: string]: any }) {
-				if (key !== "position") {
-					if (key !== "file" || addFileData) {
-						const value = page[key];
-						const arrValues = [value].flat(4);
+			function updateCell(col: string, currRow: { [col: string]: any }) {
+				if (col !== "position" && (col !== "file" || addFileData)) {
+					const value = page[col];
+					const arrValues = [value].flat(4);
 
-						// Collect unique keys for later
-						if (!uniqueKeys.includes(key)) uniqueKeys.push(key);
+					// Collect unique keys for later
+					if (!uniqueKeys.includes(col)) uniqueKeys.push(col);
 
-						if (value === null || value == undefined) {
-							// Null values
-							currRow[key] = actualNullValue;
-						} else if (typeof value === "string") {
-							// String values
+					if (value === null || value == undefined) {
+						// Null values
+						currRow[col] = actualNullValue;
+					} else if (typeof value === "string") {
+						// String values
 
-							const splits = value.match(splitLinksRegex);
-							if (splits !== null) {
-								const strs = splits
-									.map((link) => {
-										const dropped =
-											link.match(dropHeaderOrAlias)?.[1];
-										if (dropped) {
-											return `[[${dropped}]]`;
-										} else {
-											return link;
-										}
-									})
-									.join(", ");
-								currRow[key] = strs;
-							} else {
-								currRow[key] = value;
-							}
-						} else if (arrValues?.[0]?.ts) {
-							// Dates
-							currRow[key] = arrValues
-								.map((val) => val?.ts)
+						const splits = value.match(splitLinksRegex);
+						if (splits !== null) {
+							// Wikilink-strings
+							const links = splits
+								.map((link) => {
+									const dropped =
+										link.match(dropHeaderOrAlias)?.[1];
+
+									return dropped ? `[[${dropped}]]` : link;
+								})
 								.join(", ");
-						} else if (arrValues?.[0]?.path) {
-							// Link objects
-							currRow[key] = arrValues
-								.map((val) => `[[${val?.path}]]`)
-								.join(", ");
-						} else if (
-							Object.prototype.toString.call(value) ===
-							"[object Object]"
-						) {
-							currRow[key] = value;
+							currRow[col] = links;
 						} else {
-							// Miscellaneous arrays are joined into strings
-							currRow[key] = arrValues.join(", ");
+							// Non-link String
+							currRow[col] = value;
 						}
+					} else if (arrValues?.[0]?.ts) {
+						// Dates
+						currRow[col] = arrValues
+							.map((val) => val?.ts)
+							.join(", ");
+					} else if (arrValues?.[0]?.path) {
+						// Link objects
+						currRow[col] = arrValues
+							.map((val) => `[[${val?.path}]]`)
+							.join(", ");
+					} else if (
+						Object.prototype.toString.call(value) ===
+						"[object Object]"
+					) {
+						currRow[col] = value;
+					} else {
+						// Miscellaneous arrays are joined into strings
+						currRow[col] = arrValues.join(", ");
 					}
 				}
 			}
 
-			for (const key of fieldsToCheck) {
-				// Process values
-				updateCell(key, currRow);
-			}
+			for (const key of fieldsToCheck) updateCell(key, currRow);
 
 			const { unwrappedFields } = this;
 			for (const field in unwrappedFields) {
@@ -500,17 +494,17 @@ export default class DataAnalysisPlugin extends Plugin {
 				}
 			}
 
-			yamldf.push(currRow);
+			table.push(currRow);
 		}
 
-		for (let i = 0; i < Object.keys(yamldf).length; i++) {
+		for (let i = 0; i < Object.keys(table).length; i++) {
 			uniqueKeys.forEach((key) => {
-				if (yamldf[i][key] === undefined) {
-					yamldf[i][key] = stringToNullOrUndefined(undefinedValue);
+				if (table[i][key] === undefined) {
+					table[i][key] = stringToNullOrUndefined(undefinedValue);
 				}
 			});
 		}
-		return yamldf;
+		return table;
 	}
 
 	async writeMetadataframe(jsDF: { [key: string]: string | number }[]) {
