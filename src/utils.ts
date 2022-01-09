@@ -5,9 +5,9 @@ import { DECIMALS } from "./const";
 import DataAnalysisPlugin from "./main";
 import { StatsModal } from "./StatsModal";
 
-export const splitAndTrim = (fields: string): string[] => {
+export const splitAndTrim = (fields: string, split: string = ","): string[] => {
 	if (fields === "") return [];
-	else return fields.split(",").map((str) => str.trim());
+	else return fields.split(split).map((str) => str.trim());
 };
 
 export function makeArr<T>(input: T | T[]): any[] {
