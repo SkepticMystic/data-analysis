@@ -10,7 +10,7 @@ export const splitAndTrim = (fields: string): string[] => {
 	else return fields.split(",").map((str) => str.trim());
 };
 
-export function makeArr<T>(input: T | T[]): T[] {
+export function makeArr<T>(input: T | T[]): any[] {
 	return [input].flat();
 }
 
@@ -60,12 +60,12 @@ export function menuForChartNStatsModal(
 ) {
 	const { app } = plugin;
 	const menu = new Menu(app);
-	const { target } = event;
-	const { parentElement } = target;
+	const target = (<HTMLElement>event.target);
+	const parentElement = (<HTMLTableRowElement>target.parentElement);
 
 	const clickedCellText = tryParseNumber(target.innerText);
 
-	const allCellTexts = [...parentElement.cells].map(
+	const allCellTexts = Array.from(parentElement.cells).map(
 		(el: HTMLTableCellElement) => tryParseNumber(el.textContent)
 	) as [string, string, number];
 
