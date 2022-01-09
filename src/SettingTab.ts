@@ -27,12 +27,12 @@ export class SettingTab extends PluginSettingTab {
 					const noDups = [...new Set(splits)];
 					if (splits.length !== noDups.length) {
 						new Notice("Duplicates found and removed");
-						await plugin.saveSettings();
 						settings.fieldsToCheck = noDups;
+						await plugin.saveSettings();
 						this.display();
 					} else {
-						await plugin.saveSettings();
 						settings.fieldsToCheck = splits;
+						await plugin.saveSettings();
 					}
 					await plugin.refreshIndex();
 				};
