@@ -47,7 +47,7 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		const onAPIReady = async (api: DataviewApi) => {
 			this.app.workspace.onLayoutReady(async () => {
-				await this.refreshIndex(api);
+				await this.refreshIndex();
 				this.index.corrs = this.buildAllCorrelations();
 			});
 		};
@@ -74,8 +74,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		this.addCommand({
 			id: "refresh-index",
 			name: "Refresh Index",
-			callback: async () =>
-				await this.refreshIndex(this.app.plugins.plugins.dataview?.api),
+			callback: async () => await this.refreshIndex(),
 		});
 		this.addCommand({
 			id: "chart-view",
@@ -126,6 +125,8 @@ export default class DataAnalysisPlugin extends Plugin {
 			.getLeavesOfType(CORRELATION_VIEW)
 			.forEach((leaf) => leaf.detach());
 	}
+
+	getDVAPI = () => this.app.plugins.plugins.dataview?.api;
 
 	unproxy(item: any): DataType[] {
 		const unproxied = [];
@@ -199,12 +200,14 @@ export default class DataAnalysisPlugin extends Plugin {
 			});
 		}
 	}
-	async refreshIndex(dvApi: DataviewApi) {
+	async refreshIndex() {
 		const notice = new Notice("Index refreshing...");
+		const dvApi = this.getDVAPI();
 		if (!dvApi) {
 			notice.setMessage("Dataview must be enabled");
 			return;
 		}
+
 		const { fieldsToCheck, fieldLists } = this.settings;
 		for (const path of fieldLists) {
 			const file = this.app.metadataCache.getFirstLinkpathDest(path, "");

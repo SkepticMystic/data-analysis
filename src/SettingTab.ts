@@ -34,9 +34,7 @@ export class SettingTab extends PluginSettingTab {
 						await plugin.saveSettings();
 						settings.fieldsToCheck = splits;
 					}
-					await plugin.refreshIndex(
-						plugin.app.plugins.plugins.dataview?.api
-					);
+					await plugin.refreshIndex();
 				};
 			});
 		new Setting(containerEl)
@@ -78,9 +76,7 @@ export class SettingTab extends PluginSettingTab {
 					const splits = splitAndTrim(text.getValue());
 					settings.fieldLists = splits;
 					await plugin.saveSettings();
-					await plugin.refreshIndex(
-						this.app.plugins.plugins.dataview?.api
-					);
+					await plugin.refreshIndex();
 				};
 			});
 		new Setting(containerEl)

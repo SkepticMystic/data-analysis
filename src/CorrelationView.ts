@@ -25,7 +25,7 @@ export default class CorrelationView extends ItemView {
 		return "Correlations View";
 	}
 
-	icon = addFeatherIcon("trending-up") as string;
+	icon = <string>addFeatherIcon("trending-up");
 
 	async onOpen(): Promise<void> {
 		await this.draw();
@@ -47,9 +47,7 @@ export default class CorrelationView extends ItemView {
 			{ text: "↻", attr: { "aria-label": "Refresh Index & Redraw" } },
 			(but) => {
 				but.onclick = async () => {
-					await plugin.refreshIndex(
-						this.app.plugins.plugins.dataview.api
-					);
+					await plugin.refreshIndex();
 					plugin.index.corrs = plugin.buildAllCorrelations();
 					await this.draw();
 				};
