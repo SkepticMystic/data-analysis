@@ -23,23 +23,6 @@ export function stringToNullOrUndefined(current: string) {
 	else return current;
 }
 
-export function arrayOverlap<T>(A: T[], B: T[]): [T[], T[]] {
-	const iA: number[] = [];
-	A.forEach((a, i) => {
-		if (a !== undefined) iA.push(i);
-	});
-	const iB: number[] = [];
-	B.forEach((b, i) => {
-		if (b !== undefined) iB.push(i);
-	});
-
-	const aOverlap = A.filter((a, i) => iA.includes(i) && iB.includes(i));
-	const bOverlap = B.filter((b, i) => iA.includes(i) && iB.includes(i));
-
-	if (!aOverlap.length || !bOverlap.length) return [[], []];
-	return [aOverlap, bOverlap];
-}
-
 export const toKebabCase = (input: string) =>
 	input
 		.replace(/([a-z])([A-Z])/g, "$1-$2")
