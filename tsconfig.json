@@ -1,16 +1,17 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "module": "ESNext",
-    "target": "ES2021",
-    "allowJs": true,
-    "noImplicitAny": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "lib": ["es2021","dom"]
-  },
-  "include": ["src/**/*", "src/*", "**/*.ts"],
-  "exclude": ["node_modules/*"]
+	"compilerOptions": {
+		"baseUrl": ".",
+		"inlineSourceMap": true,
+		"inlineSources": true,
+		"module": "ESNext",
+		"target": "ES2021",
+		"allowJs": true,
+		"noImplicitAny": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"lib": ["es2021", "dom"],
+		"esModuleInterop": true
+	},
+	"include": ["src/**/*", "src/*", "**/*.ts"],
+	"exclude": ["node_modules/*"]
 }
