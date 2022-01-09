@@ -1,8 +1,12 @@
 import { Settings } from "./interfaces";
+import { roundNumber } from "./utils";
 
 export const CORRELATION_VIEW = "correlation-view";
 
-/** Number of decimals places to round to, by default */
+/** Number of decimals places to round to, by default.
+ *
+ * Used as a default in {@link roundNumber}.
+ */
 export const DECIMALS = 4;
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -16,5 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	addNoteContent: false,
 };
 
+/** Grabs all wikilinks out of a string */
 export const splitLinksRegex = new RegExp(/\[\[(.*?)\]\]/g);
+/** Returns only the note name from a wikilink */
 export const dropHeaderOrAlias = new RegExp(/\[\[([^#|]*)\]\]/);

@@ -9,14 +9,9 @@ export function getPearsonCorrelation(
 	ys: number[],
 	skipQuantCheck = false
 ) {
-	if (xs.length <= 1 || ys.length <= 1)
-		return null;
+	if (xs.length <= 1 || ys.length <= 1) return null;
 
-	if (
-		!skipQuantCheck &&
-		(!isQuant(xs) || !isQuant(ys))
-	)
-		return null;
+	if (!skipQuantCheck && (!isQuant(xs) || !isQuant(ys))) return null;
 
 	const n = xs.length;
 	if (n !== ys.length) throw new Error("Arrays must be the same length");
@@ -65,6 +60,13 @@ export function getPearsonCorrelation(
 	return corr;
 }
 
+/**
+ * Given a set of binary values and a set of quantitative values, return the point-biserial
+correlation coefficient.
+ * @param {(number | boolean)[]} xs - The array of binary values.
+ * @param {number[]} ys - the dependent variable
+ * @returns The point biserial correlation.
+ */
 export function getPointBiserialCorrelation(
 	xs: (number | boolean)[],
 	ys: number[]
@@ -72,8 +74,8 @@ export function getPointBiserialCorrelation(
 	if (xs.length <= 1 || ys.length <= 1 || !isBinary(xs) || !isQuant(ys))
 		return null;
 
-	const m0 = [],
-		m1 = [];
+	const m0: number[] = [],
+		m1: number[] = [];
 	xs.forEach((x, i) => {
 		const y = ys[i];
 		if (!x) m0.push(y);
@@ -88,7 +90,7 @@ export function getPointBiserialCorrelation(
 
 /**
  * Checks if all values in `xs` are numbers
- * @param {arraytype} xs - number[]
+ * @param {number[]} xs - The array of numbers to check.
  * @returns {boolean}
  */
 export function isQuant(xs: number[]): boolean {
@@ -96,8 +98,8 @@ export function isQuant(xs: number[]): boolean {
 }
 
 /**
- * `isBinary` checks if the given array only contains `0`'s and `1`'s.
- * @param {arraytype} xs - number[]
+ * Checks if the given array only contains `0`'s and `1`'s, or `true`'s and `false`'s.
+ * @param {(number | boolean)[]} xs - The array of values to check.
  * @returns {boolean}
  */
 export function isBinary(xs: (number | boolean)[]): boolean {
@@ -109,8 +111,10 @@ export function isBinary(xs: (number | boolean)[]): boolean {
 
 /**
  * Compute the mean of a list of numbers.
- * @param {arraytype} xs - number[]
- * @returns The mean of the numbers in the array.
+ *
+ * Checks if {@link isQuant}.
+ * @param {number[]} xs - The array of numbers to compute the mean of.
+ * @returns The mean of `xs`.
  */
 export function getMean(xs: number[]) {
 	if (!isQuant(xs)) return null;
@@ -119,24 +123,26 @@ export function getMean(xs: number[]) {
 
 /**
  * Given a list of numbers, return the median of the list.
- * @param {arraytype} xs - the array of numbers to be sorted
+ *
+ * Checks if {@link isQuant}.
+ * @param {number[]} xs - The array of numbers to be sorted
  * @returns The median of the array.
  */
 export function getMedian(xs: number[]) {
 	if (!isQuant(xs)) return null;
 	const sorted = xs.slice().sort((a, b) => a - b);
-	const mid = Math.floor(sorted.length / 2);
-	return sorted[mid];
+	return sorted[Math.floor(sorted.length / 2)];
 }
 
 /**
  * Given a list of items, return the most common item.
- * @param {arraytype} xs - The array of values to count.
+ * @param {(string | number | string[] | number[])[]} xs - The array of values to count.
  * @returns {string[]} The mode(s) of the array.
  */
 export function getMode(
 	xs: (string | number | string[] | number[])[]
 ): string[] {
+	// TODO: Check the dataType of the array.
 	const flattened = xs.flat();
 	const counts: { [item: string | number]: number } = {};
 	flattened.forEach((x) => {
@@ -149,18 +155,22 @@ export function getMode(
 
 /**
  * Calculate the variance of a set of numbers.
- * @param {arraytype} xs - the array of numbers to be analyzed
+ *
+ * Checks if {@link isQuant}.
+ * @param {number[]} xs - The array of numbers to be analyzed
  * @returns The variance of the array.
  */
 export function getVariance(xs: number[]) {
 	if (!isQuant(xs)) return null;
-	const mean_x = getMean(xs);
-	return xs.reduce((a, b) => a + Math.pow(b - mean_x, 2), 0) / xs.length;
+	const mean = getMean(xs);
+	return xs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / xs.length;
 }
 
 /**
  * Compute the standard deviation of a set of numbers.
- * @param {arraytype} xs - the array of numbers to be analyzed
+ *
+ * Checks if {@link isQuant}.
+ * @param {number[]} xs - the array of numbers to be analyzed
  * @returns The standard deviation of the array.
  */
 export function getStdDev(xs: number[]) {

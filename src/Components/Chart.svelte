@@ -67,8 +67,8 @@
 		const ys = innerData.map((p) => p.y);
 
 		if (isValidSelection(f1, f2)) {
-			const xValid = isQuant(xs)
-			const yValid = isQuant(ys)
+			const xValid = isQuant(xs);
+			const yValid = isQuant(ys);
 			if (!xValid && !yValid) {
 				errorMessage = "Both fields have non-numeric values.";
 				return null;
@@ -82,7 +82,7 @@
 			errorMessage = "";
 			return getPearsonCorrelation(xs, ys, true);
 		}
-		return null; 
+		return null;
 	}
 
 	function refreshChartData(colour: string, innerData: Datum2d[]) {
