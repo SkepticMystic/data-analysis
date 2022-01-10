@@ -1,4 +1,4 @@
-import {buildAllCorrelations, buildAllPairs} from "../correlationUtils";
+import {buildAllCorrelations, buildAllPairs, processPages} from "../correlationUtils";
 import { correlations, fieldsToCheck, fileData } from "./testData";
 
 function factorial(num: number): number {
@@ -20,4 +20,9 @@ test('buildAllPairs creates correlation pairs without missing any fields and wit
 
 test('buildAllCorrelations creates all correlation pairs', () => {
     expect(buildAllCorrelations(fileData, fieldsToCheck)).toEqual(correlations)
+})
+
+test('only load file data for files that have metadata of interest to us', () => {
+    const result = processPages(fileData, fieldsToCheck);
+    expect(result.pages.length).toEqual(fileData.length-2);
 })

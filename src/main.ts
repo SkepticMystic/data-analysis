@@ -13,14 +13,13 @@ import { Correlations, DataType, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
 import {
-	arrayOverlap,
 	makeArr,
 	makeSub,
-	splitAndTrim,
 	stringToNullOrUndefined,
 } from "./utils";
 import {
 	buildAllCorrelations,
+	processPages,
 } from "./correlationUtils";
 import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
 import CorrelationView from "./CorrelationView";
@@ -41,7 +40,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		minDate: undefined,
 		maxDate: undefined,
 	};
-	/* { foods: ["banana"] } */
+
 	unwrappedFields: { [field: string]: string[] } = {};
 
 	async onload() {
@@ -53,7 +52,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		const onAPIReady = async (api: DataviewApi) => {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex(api);
-				this.index.corrs = buildAllCorrelations(this.index.data, this.settings.fieldsToCheck);
+				this.index.corrs = buildAllCorrelations(this.index.data, this.settings.fieldsToCheck, true);
 			});
 		};
 
@@ -136,50 +135,6 @@ export default class DataAnalysisPlugin extends Plugin {
 			.forEach((leaf) => leaf.detach());
 	}
 
-	unproxy(item: any): DataType[] {
-		const unproxied = [];
-
-		const queue = [item];
-		while (queue.length) {
-			const currItem = queue.shift();
-			// "Proxy" for checking if `currItem` is a proxy
-			if (typeof currItem.defaultComparator === "function") {
-				const possibleUnproxied = Object.assign({}, currItem);
-				const { values } = possibleUnproxied;
-				if (values) queue.push(...values);
-				else unproxied.push(possibleUnproxied);
-			} else unproxied.push(currItem);
-		}
-		return unproxied;
-	}
-
-	getInnerValue(value: any) {
-		const unproxied = this.unproxy(value);
-		if (unproxied.length === 1) {
-			if (typeof unproxied[0] === "string") {
-				let list = unproxied[0];
-				if (list.startsWith("[") && list.endsWith("]")) {
-					list = list.slice(1, -1);
-				}
-				const splits = splitAndTrim(list).map((item) => {
-					if (item.startsWith(`"`) && item.endsWith(`"`)) {
-						return item.slice(1, -1);
-					} else return item;
-				});
-				if (splits.length === 1) return splits[0];
-				else return splits;
-			} else {
-				if (unproxied[0].type === "file") {
-					return unproxied[0].path;
-				} else return unproxied[0];
-			}
-		} else {
-			if (unproxied[0].type === "file") {
-				return unproxied.map((link) => link.path);
-			} else return unproxied;
-		}
-	}
-
 	unwrapStrLists(data: { [field: string]: any }[]) {
 		const { unwrappedFields } = this;
 		const { fieldsToCheck } = this.settings;
@@ -229,23 +184,14 @@ export default class DataAnalysisPlugin extends Plugin {
 			await this.saveSettings();
 		}
 
-		const pages: { [field: string]: any }[] = dvApi.pages().values;
-		const dates: DateTime[] = [];
-		pages.forEach((page) => {
-			const potentialDate = DateTime.fromISO(page.file.name);
-			if (potentialDate.isValid) dates.push(potentialDate);
+		let pages: { [field: string]: any }[] = dvApi.pages().values;
+		const result = processPages(pages, fieldsToCheck)
 
-			fieldsToCheck.forEach((field) => {
-				const value = page[field];
-				if (value) page[field] = this.getInnerValue(value);
-			});
-		});
+		this.unwrapStrLists(result.pages);
 
-		this.unwrapStrLists(pages);
-
-		this.index.data = pages;
-		this.index.minDate = DateTime.min(...dates);
-		this.index.maxDate = DateTime.max(...dates);
+		this.index.data = result.pages;
+		this.index.minDate = DateTime.min(...result.dates);
+		this.index.maxDate = DateTime.max(...result.dates);
 
 		console.log(this.index);
 		notice.setMessage("Index refreshed ✅");
