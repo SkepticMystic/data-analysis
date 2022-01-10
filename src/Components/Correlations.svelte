@@ -29,10 +29,16 @@
 		});
 	}
 
-	function updateFieldsInFile(currFile: TFile) {
+	function updateFieldsInFile(currFile: TFile): string[] {
 		const currPage = index.data.find(
 			(d) => d.file.name === currFile.basename
 		);
+
+		// If we didn't indexed the current page, it didn't have any fields
+		if (!currPage) {
+			return [];
+		}
+
 		const fieldsInFile = Object.keys(currPage);
 
 		const { unwrappedFields } = plugin;
@@ -92,34 +98,39 @@
 		</label>
 	</div>
 
-	<table class="markdown-preview-view">
-		<thead>
-			<tr>
-				<th>Field 1</th>
-				<th>Field 2</th>
-				<th>Correlation</th>
-			</tr>
-		</thead>
+	{#if corrsToShow.length == 0}
+		No relevant fields in current file. Select a different file.
+	{:else}
+		<table class="markdown-preview-view">
+			<thead>
+				<tr>
+					<th>Field 1</th>
+					<th>Field 2</th>
+					<th>Correlation</th>
+				</tr>
+			</thead>
 
-		<tbody>
-			{#key absQ}
-				{#each corrsToShow as { fA, fB, info: { corr, n } }}
-					{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && lower <= corr && corr <= upper}
-						<tr
-							aria-label={n ? "n: " + n.toFixed() : ""}
-							aria-label-position="left"
-							on:contextmenu={(e) =>
-								menuForChartNStatsModal(e, plugin)}
-						>
-							<td>{fA}</td>
-							<td>{fB}</td>
-							<td>{corr.toFixed(4)}</td>
-						</tr>
-					{/if}
-				{/each}
-			{/key}
-		</tbody>
-	</table>
+			<tbody>
+				{#key absQ}
+						{#each corrsToShow as { fA, fB, info: { corr, n } }}
+							{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && lower <= corr && corr <= upper}
+								<!-- svelte-ignore a11y-unknown-aria-attribute -->
+							<tr
+								aria-label={n ? "n: " + n.toFixed() : ""}
+								aria-label-position="left"
+								on:contextmenu={(e) =>
+									menuForChartNStatsModal(e, plugin)}
+							>
+								<td>{fA}</td>
+								<td>{fB}</td>
+								<td>{corr.toFixed(4)}</td>
+							</tr>
+						{/if}
+					{/each}
+				{/key}
+			</tbody>
+		</table>
+	{/if}
 </div>
 
 <style>
