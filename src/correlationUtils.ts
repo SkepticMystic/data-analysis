@@ -1,5 +1,6 @@
 import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
 import { Correlations, DataType } from "./interfaces";
+import { DateTime } from "luxon";
 
 export function arrayOverlap<T>(A: T[], B: T[]): [T[], T[]] {
 	const iA: number[] = [];
@@ -33,6 +34,73 @@ export const inferType = (
     else return "object";
 }
 
+export const splitAndTrim = (fields: string): string[] => {
+	if (fields === "") return [];
+	else return fields.split(",").map((str) => str.trim());
+};
+
+export const getInnerValue = (value: any) => {
+    const unproxied = unproxy(value);
+    if (unproxied.length === 1) {
+        if (typeof unproxied[0] === "string") {
+            let list = unproxied[0];
+            if (list.startsWith("[") && list.endsWith("]")) {
+                list = list.slice(1, -1);
+            }
+            const splits = splitAndTrim(list).map((item) => {
+                if (item.startsWith(`"`) && item.endsWith(`"`)) {
+                    return item.slice(1, -1);
+                } else return item;
+            });
+            if (splits.length === 1) return splits[0];
+            else return splits;
+        } else {
+            if (unproxied[0].type === "file") {
+                return unproxied[0].path;
+            } else return unproxied[0];
+        }
+    } else {
+        if (unproxied[0].type === "file") {
+            return unproxied.map((link) => link.path);
+        } else return unproxied;
+    }
+}
+
+export const unproxy = (item: any): DataType[] => {
+    const unproxied = [];
+
+    const queue = [item];
+    while (queue.length) {
+        const currItem = queue.shift();
+        // "Proxy" for checking if `currItem` is a proxy
+        if (typeof currItem.defaultComparator === "function") {
+            const possibleUnproxied = Object.assign({}, currItem);
+            const { values } = possibleUnproxied;
+            if (values) queue.push(...values);
+            else unproxied.push(possibleUnproxied);
+        } else unproxied.push(currItem);
+    }
+    return unproxied;
+}
+
+export const processPages = (pages: { [field: string]: any }[],fieldsToCheck: string[]): {pages: { [field: string]: any }[], dates: DateTime[]} => {
+    const dates: DateTime[] = [];
+    pages.forEach((page) => {
+        const potentialDate = DateTime.fromISO(page.file.name);
+        if (potentialDate.isValid) dates.push(potentialDate);
+
+        fieldsToCheck.forEach((field) => {
+            const value = page[field];
+            if (value) {
+                page["hasFieldsOfInterest"] = true;
+                page[field] = getInnerValue(value);
+            }
+        });
+    });
+
+    return {pages: pages.filter((page) => page.hasFieldsOfInterest), dates: dates}
+}
+
 export const buildAllPairs = (items: string[]): string[][] => {
 	let results = [];
 
@@ -45,7 +113,7 @@ export const buildAllPairs = (items: string[]): string[][] => {
 	return results;
 }
 
-export const buildAllCorrelations = (data: { [field: string]: DataType }[], fieldsToCheck: string[]): Correlations => {
+export const buildAllCorrelations = (data: { [field: string]: DataType }[], fieldsToCheck: string[], debugMode: boolean = false): Correlations => {
     const corrs: Correlations = {};
 
     for (const fA of fieldsToCheck) {
@@ -112,6 +180,8 @@ export const buildAllCorrelations = (data: { [field: string]: DataType }[], fiel
             }
         }
     }
-    // console.log({ corrs });
+    if (debugMode) {
+        console.log({ corrs });
+    }
     return corrs;
 }
