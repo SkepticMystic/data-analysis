@@ -101,7 +101,13 @@ export const processPages = (pages: { [field: string]: any }[],fieldsToCheck: st
     return {pages: pages.filter((page) => page.hasFieldsOfInterest), dates: dates}
 }
 
-export const buildAllPairs = (items: string[]): string[][] => {
+export const buildAllPairs = (items: string[], sorted:boolean = false): string[][] => {
+    if (!sorted) {
+        items.sort(function (a, b) {
+            return a.localeCompare(b);
+        });
+    }
+
 	let results = [];
 
 	for (let outerIndex = 0; outerIndex < items.length; outerIndex++) {
@@ -111,6 +117,141 @@ export const buildAllPairs = (items: string[]): string[][] => {
 		}
 	}
 	return results;
+}
+
+export const buildAllDataByFieldsToCheck = (data: { [field: string]: DataType }[], fieldsToCheck: string[]): { [field: string]: DataType[] } => {
+    const dataByField: { [field: string]: DataType[] } = {};
+    for (const field of fieldsToCheck) {
+        dataByField[field] = data.map((page) => page[field]);
+    }
+    return dataByField;
+}
+
+export const refactoredBuildAllCorrelations = (data: { [field: string]: DataType }[], fieldsToCheck: string[], pairsToSkip: string[][] = [], debugMode: boolean = false): Correlations => {
+    // Alphabetize fieldsToCheck list. This makes it easier to keep track of the correlation pairs.
+    fieldsToCheck.sort(function (a, b) {
+        return a.localeCompare(b);
+    });
+
+    // Alphabetize skip pairs. This allows us to easily remove pairs from the future correlation pair list.
+    const alphabetizedSkipPairs: string[][] = []
+    for (const skipPair of pairsToSkip) {
+        skipPair.sort(function (a, b) {
+            return a.localeCompare(b);
+        });
+        alphabetizedSkipPairs.push(skipPair);
+    }
+
+    const corrs: Correlations = {}
+    const dataByField = buildAllDataByFieldsToCheck(data, fieldsToCheck);
+
+    // Build all correlation pairs. Filter out any of the skip pairs.
+    const pairs = buildAllPairs(fieldsToCheck, true).filter((value: string[]) => !alphabetizedSkipPairs.includes(value));
+
+    for (const pair of pairs) {
+        const fieldA = pair[0];
+        const fieldB = pair[1];
+        const fieldAData = dataByField[fieldA];
+        const fieldBData = dataByField[fieldB];
+
+        buildCorrelation(fieldA, fieldB, fieldAData, fieldBData, corrs);
+    }
+
+    if (debugMode) {
+        console.log({ corrs });
+    }
+
+    return corrs;
+}
+
+const buildCorrelationNumberAndObject = (numberField: string, numberFieldData: DataType[], objectField: string, objectFieldData: DataType[], corrs: Correlations): Correlations => {
+    if (!corrs[numberField]) {
+        corrs[numberField] = {};
+    }
+
+    const oA = numberFieldData.filter((a) => a);
+    const oB = (objectFieldData as string[][]).filter(
+        (b, i) => numberFieldData[i] !== undefined
+    );
+
+    const uniqueStrs = [...new Set(oB.flat())].filter(
+        (str) => typeof str === "string"
+    );
+    uniqueStrs.forEach((subF) => {
+        const subA = oA;
+        const subB = oB.map((b) =>
+            b && b.includes(subF) ? 1 : 0
+        );
+        const corr = getPointBiserialCorrelation(subB, subA);
+        corrs[numberField][objectField + "." + subF] = corr
+            ? { corr, n: subA.length }
+            : null;
+    });
+
+    return corrs;
+}
+
+const buildCorrelationNumberAndString = (stringField: string, stringFieldData: DataType[], numberField: string, numberFieldData: DataType[], corrs: Correlations): Correlations => {
+    if (!corrs[numberField]) {
+        corrs[numberField] = {};
+    }
+
+    const oA = numberFieldData.filter((a: any) => a);
+    const oB = stringFieldData
+        .filter((b, i) => numberFieldData[i] !== undefined)
+        .map((b) => b ?? 0);
+
+    const uniqueStrs = [...new Set(oB)].filter(
+        (str) => typeof str === "string"
+    );
+    uniqueStrs.forEach((subF) => {
+        const subA = oA;
+        const subB = oB.map((b) => (b === subF ? 1 : 0));
+
+        const corr = getPointBiserialCorrelation(subB, subA);
+        corrs[numberField][stringField + "." + subF] = corr
+            ? { corr, n: subA.length }
+            : null;
+    });
+
+    return corrs;
+}
+
+export const buildCorrelation = (fieldA: string, fieldB: string, fieldAData: DataType[], fieldBData: DataType[], corrs: Correlations): Correlations => {
+    if (fieldA == fieldB) {
+        return;
+    }
+
+    if (!corrs[fieldA]) {
+        corrs[fieldA] = {};
+    }
+
+    const fieldAType = inferType(fieldAData);
+    const fieldBType = inferType(fieldBData);
+
+    if (fieldAType === "number" && fieldBType === "number") {
+        const [oA, oB] = arrayOverlap(fieldAData, fieldBData);
+        const corr = getPearsonCorrelation(oA, oB);
+        corrs[fieldA][fieldB] = corr ? { corr, n: oA.length } : null;
+    } else if (fieldAType === "number" && fieldBType === "string") {
+        corrs = buildCorrelationNumberAndString(fieldB, fieldBData, fieldA, fieldAData, corrs);
+    } else if (fieldAType === "number" && fieldBType === "object") {
+        corrs = buildCorrelationNumberAndObject(fieldA, fieldAData, fieldB, fieldBData, corrs);
+    } else if (fieldAType === "string" && fieldBType === "string") {
+        corrs[fieldA][fieldB] = null;
+    } else if (fieldAType === "string" && fieldBType === "number") {
+        corrs = buildCorrelationNumberAndString(fieldA, fieldAData, fieldB, fieldBData, corrs);
+    } else if (fieldAType === "string" && fieldBType === "object") {
+        corrs[fieldA][fieldB] = null;
+    } else if (fieldAType === "object" && fieldBType === "object") {
+        corrs[fieldA][fieldB] = null;
+    } else if (fieldAType === "object" && fieldBType === "number") {
+        corrs = buildCorrelationNumberAndObject(fieldB, fieldBData, fieldA, fieldAData, corrs);
+    } else if (fieldAType === "object" && fieldBType === "string") {
+        corrs[fieldA][fieldB] = null;
+    }
+
+    return corrs;
 }
 
 export const buildAllCorrelations = (data: { [field: string]: DataType }[], fieldsToCheck: string[], debugMode: boolean = false): Correlations => {
