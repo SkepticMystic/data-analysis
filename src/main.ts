@@ -1,6 +1,7 @@
-import { DateTime } from "luxon";
 import { Parser, transforms } from "json2csv";
+import { DateTime } from "luxon";
 import { normalizePath, Notice, Plugin } from "obsidian";
+import { openView } from "obsidian-community-lib";
 import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
 import {
@@ -10,6 +11,9 @@ import {
 	dropHeaderOrAlias,
 	splitLinksRegex,
 } from "./const";
+import CorrelationsReportView from "./CorrelationsReportView";
+import { buildAllCorrelations, processPages } from "./correlationUtils";
+import CorrelationView from "./CorrelationView";
 import { Correlations, DataType, Row, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
@@ -19,11 +23,6 @@ import {
 	splitAndTrim,
 	stringToNullOrUndefined,
 } from "./utils";
-import { buildAllCorrelations, processPages } from "./correlationUtils";
-import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
-import CorrelationView from "./CorrelationView";
-import { getSelectionFromEditor, openView } from "obsidian-community-lib";
-import CorrelationsReportView from "./CorrelationsReportView";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
@@ -49,7 +48,7 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
-		const onAPIReady = async (api: DataviewApi) => {
+		const onAPIReady = async () => {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex();
 				this.index.corrs = buildAllCorrelations(
@@ -62,13 +61,13 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		if (this.app.plugins.enabledPlugins.has("dataview")) {
 			const api = this.app.plugins.plugins.dataview?.api;
-			if (api) await onAPIReady(api);
+			if (api) await onAPIReady();
 			else {
 				this.registerEvent(
 					this.app.metadataCache.on(
 						"dataview:api-ready",
 						async (api) => {
-							await onAPIReady(api);
+							await onAPIReady();
 						}
 					)
 				);
