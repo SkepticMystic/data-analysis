@@ -4,6 +4,7 @@ import { normalizePath, Notice, Plugin } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
 import {
+	CORRELATION_REPORT_VIEW,
 	CORRELATION_VIEW,
 	DEFAULT_SETTINGS,
 	dropHeaderOrAlias,
@@ -24,6 +25,7 @@ import {
 import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
 import CorrelationView from "./CorrelationView";
 import { openView } from "obsidian-community-lib";
+import CorrelationsReportView from "./CorrelationsReportView";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
@@ -118,20 +120,35 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-correlation-view",
-			name: "Open Correlation View",
+			name: "Open File Correlations View",
 			callback: async () =>
 				await openView(this.app, CORRELATION_VIEW, CorrelationView),
+		});
+
+		this.addCommand({
+			id: "open-correlation-report",
+			name: "Open Correlations Summary Report",
+			callback: async () =>
+				await openView(this.app, CORRELATION_REPORT_VIEW, CorrelationsReportView),
 		});
 
 		this.registerView(
 			CORRELATION_VIEW,
 			(leaf) => new CorrelationView(leaf, this)
 		);
+
+		this.registerView(
+			CORRELATION_REPORT_VIEW,
+			(leaf) => new CorrelationsReportView(leaf, this)
+		);
 	}
 
 	onunload() {
 		this.app.workspace
 			.getLeavesOfType(CORRELATION_VIEW)
+			.forEach((leaf) => leaf.detach());
+		this.app.workspace
+			.getLeavesOfType(CORRELATION_REPORT_VIEW)
 			.forEach((leaf) => leaf.detach());
 	}
 
