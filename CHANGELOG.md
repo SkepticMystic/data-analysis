@@ -1,4 +1,24 @@
 ## Changelog
+### [0.0.20](https://github.com/SkepticMystic/data-analysis/compare/0.0.19...0.0.20) (2022-01-11)
+
+
+### Features
+
+* :sparkles: Allow other splitters in splitAndTrim ([278e43b](https://github.com/SkepticMystic/data-analysis/commit/278e43b542f5c6417791ad30c9a329f6fc9db98f))
+
+
+### Documentation
+
+* :memo: Add TSDocs to functions ([078966b](https://github.com/SkepticMystic/data-analysis/commit/078966bd3847f8a90aeef101483e9833cb77cfce))
+
+
+### Fixes
+
+* :bug: Save settings after changing them ([02800fa](https://github.com/SkepticMystic/data-analysis/commit/02800fa1bbd2c2b2be6a9ce2d0eb068ee58b3c1a))
+* **CorrelationView:** :bug: CorrelationView no longer errors when file doesn't exist in the index. ([8f5f0c0](https://github.com/SkepticMystic/data-analysis/commit/8f5f0c021373b63d70a1104371ffd7d65c449f96))
+* **CorrelationView:** :bug: Import buildAllCorrelations function after refactor. ([3d6809f](https://github.com/SkepticMystic/data-analysis/commit/3d6809fdbd1b23496fd8499f317f06094d3b15f8))
+* **WriteToCSV:** :bug: Not exactly sure why, but this works better now ([691f2b2](https://github.com/SkepticMystic/data-analysis/commit/691f2b2cd511f132665c7e3dd386d3602cda0800))
+
 ### [0.0.19](https://github.com/SkepticMystic/data-analysis/compare/0.0.18...0.0.19) (2022-01-08)
 
 ### [0.0.18](https://github.com/SkepticMystic/data-analysis/compare/0.0.17...0.0.18) (2022-01-08)
