@@ -100,7 +100,6 @@ export const correlations: Correlations = {
     }
 };
 
-
 export const correlationsNoDuplicates: Correlations = {
     "listField1":{"stringField1":null},
     "binaryField1":{
@@ -181,4 +180,12 @@ export const correlationsNoDuplicates: Correlations = {
         "listField1.FKEmQv":{corr:-0.07963739600226212,n:10},"listField1.mjP":{corr:-0.07963739600226212,n:10},
         "listField1.euWRYLUPvjC":{corr:-0.07963739600226212,n:10},"listField1.ocdfymhL":{corr:-0.07963739600226212,n:10}
     }
+};
+
+export const shortCorrelations: Correlations = {
+    "stringField1":{"listField1":null},
+    "listField1":{"stringField1":null},
+    "binaryField1":{"listField1.ocdfymhL":{corr: -Infinity,n:5},"numberField1":{corr:-0.7014895051088776,n:10},"numberField2":{corr:0.4357993349945433,n:10}},
+    "numberField1":{"stringField1.XCUXGKZ":{corr:-0.07,n:10},"numberField2":{corr:-0.4594446427674563,n:10},"stringField1.zEgrEevsuEqa":{corr:5.35,n:10}},
+    "numberField2":{"stringField1.XCUXGKZ":{corr:1.0,n:10},"stringField1.CnwaWBTgW":{corr:0.75,n:10},"stringField1.JEXtu":{corr:-0.3,n:10}}
 };
