@@ -5,6 +5,7 @@
         "StatsModal",
         "WriteToCSV",
         "CorrelationView",
-        "Index"
+        "Index",
+        "Correlation Report"
     ]
 }

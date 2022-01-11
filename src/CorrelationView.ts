@@ -2,6 +2,7 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import { addFeatherIcon } from "obsidian-community-lib";
 import Correlations from "./Components/Correlations.svelte";
 import { CORRELATION_VIEW } from "./const";
+import { buildAllCorrelations } from "./correlationUtils";
 import type DataAnalysisPlugin from "./main";
 
 export default class CorrelationView extends ItemView {
@@ -48,7 +49,10 @@ export default class CorrelationView extends ItemView {
 			(but) => {
 				but.onclick = async () => {
 					await plugin.refreshIndex();
-					plugin.index.corrs = plugin.buildAllCorrelations();
+					plugin.index.corrs = buildAllCorrelations(
+						plugin.index.data,
+						plugin.settings.fieldsToCheck
+					);
 					await this.draw();
 				};
 			}

@@ -1,7 +1,8 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
 import { DEFAULT_SETTINGS } from "./const";
+import { splitAndTrim } from "./correlationUtils";
 import DataAnalysisPlugin from "./main";
-import { splitAndTrim, toKebabCase } from "./utils";
+import { toKebabCase } from "./utils";
 
 export class SettingTab extends PluginSettingTab {
 	plugin: DataAnalysisPlugin;

@@ -2,6 +2,7 @@ import { Settings } from "./interfaces";
 import { roundNumber } from "./utils";
 
 export const CORRELATION_VIEW = "correlation-view";
+export const CORRELATION_REPORT_VIEW = "correlation-report-view";
 
 /** Number of decimals places to round to, by default.
  *

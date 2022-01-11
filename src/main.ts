@@ -4,6 +4,7 @@ import { normalizePath, Notice, Plugin } from "obsidian";
 import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
 import {
+	CORRELATION_REPORT_VIEW,
 	CORRELATION_VIEW,
 	DEFAULT_SETTINGS,
 	dropHeaderOrAlias,
@@ -13,30 +14,33 @@ import { Correlations, DataType, Row, Settings } from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
 import {
-	arrayOverlap,
 	makeArr,
 	makeSub,
 	splitAndTrim,
 	stringToNullOrUndefined,
 } from "./utils";
+import { buildAllCorrelations, processPages } from "./correlationUtils";
 import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
 import CorrelationView from "./CorrelationView";
-import { openView } from "obsidian-community-lib";
+import { getSelectionFromEditor, openView } from "obsidian-community-lib";
+import CorrelationsReportView from "./CorrelationsReportView";
 
 export default class DataAnalysisPlugin extends Plugin {
 	settings: Settings;
 	index: {
 		data: { [field: string]: DataType }[];
+		dataMap: { [field: string]: DataType[] };
 		corrs: Correlations;
 		minDate: DateTime;
 		maxDate: DateTime;
 	} = {
 		data: undefined,
+		dataMap: undefined,
 		corrs: undefined,
 		minDate: undefined,
 		maxDate: undefined,
 	};
-	/* { foods: ["banana"] } */
+
 	unwrappedFields: { [field: string]: string[] } = {};
 
 	async onload() {
@@ -48,7 +52,11 @@ export default class DataAnalysisPlugin extends Plugin {
 		const onAPIReady = async (api: DataviewApi) => {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex();
-				this.index.corrs = this.buildAllCorrelations();
+				this.index.corrs = buildAllCorrelations(
+					this.index.data,
+					this.settings.fieldsToCheck,
+					true
+				);
 			});
 		};
 
@@ -89,7 +97,14 @@ export default class DataAnalysisPlugin extends Plugin {
 		this.addCommand({
 			id: "builds-corrs",
 			name: "Build Correlations",
-			callback: async () => console.log(this.buildAllCorrelations()),
+			callback: async () => {
+				const corrs = buildAllCorrelations(
+					this.index.data,
+					this.settings.fieldsToCheck
+				);
+				// TODO: don't we want to set the index.corrs to the value here?
+				console.log(corrs);
+			},
 		});
 
 		this.addCommand({
@@ -109,14 +124,30 @@ export default class DataAnalysisPlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-correlation-view",
-			name: "Open Correlation View",
+			name: "Open File Correlations View",
 			callback: async () =>
 				await openView(this.app, CORRELATION_VIEW, CorrelationView),
+		});
+
+		this.addCommand({
+			id: "open-correlation-report",
+			name: "Open Correlations Summary Report",
+			callback: async () =>
+				await openView(
+					this.app,
+					CORRELATION_REPORT_VIEW,
+					CorrelationsReportView
+				),
 		});
 
 		this.registerView(
 			CORRELATION_VIEW,
 			(leaf) => new CorrelationView(leaf, this)
+		);
+
+		this.registerView(
+			CORRELATION_REPORT_VIEW,
+			(leaf) => new CorrelationsReportView(leaf, this)
 		);
 	}
 
@@ -170,6 +201,9 @@ export default class DataAnalysisPlugin extends Plugin {
 				return unproxied.map((link) => link.path);
 			} else return unproxied;
 		}
+		this.app.workspace
+			.getLeavesOfType(CORRELATION_REPORT_VIEW)
+			.forEach((leaf) => leaf.detach());
 	}
 
 	unwrapStrLists(data: { [field: string]: any }[]) {
@@ -223,23 +257,14 @@ export default class DataAnalysisPlugin extends Plugin {
 			await this.saveSettings();
 		}
 
-		const pages: { [field: string]: any }[] = dvApi.pages().values;
-		const dates: DateTime[] = [];
-		pages.forEach((page) => {
-			const potentialDate = DateTime.fromISO(page.file.name);
-			if (potentialDate.isValid) dates.push(potentialDate);
+		let pages: { [field: string]: any }[] = dvApi.pages().values;
+		const result = processPages(pages, fieldsToCheck);
 
-			fieldsToCheck.forEach((field) => {
-				const value = page[field];
-				if (value) page[field] = this.getInnerValue(value);
-			});
-		});
+		this.unwrapStrLists(result.pages);
 
-		this.unwrapStrLists(pages);
-
-		this.index.data = pages;
-		this.index.minDate = DateTime.min(...dates);
-		this.index.maxDate = DateTime.max(...dates);
+		this.index.data = result.pages;
+		this.index.minDate = DateTime.min(...result.dates);
+		this.index.maxDate = DateTime.max(...result.dates);
 
 		console.log(this.index);
 		notice.setMessage("Index refreshed ✅");
@@ -274,130 +299,6 @@ export default class DataAnalysisPlugin extends Plugin {
 		const type = this.inferType(xs);
 		return xs.map((x) => x ?? (type === "number" ? 0 : "N/A"));
 	}
-
-	buildAllCorrelations() {
-		const { data } = this.index;
-		const { fieldsToCheck } = this.settings;
-		const corrs: Correlations = {};
-
-		for (const fA of fieldsToCheck) {
-			corrs[fA] = {};
-			const vA = data.map((d) => d[fA]);
-			const tA = this.inferType(vA);
-			for (const fB of fieldsToCheck) {
-				if (fA === fB) continue;
-				const vB = data.map((d) => d[fB]);
-				const tB = this.inferType(vB);
-
-				if (tA === "number" && tB === "number") {
-					if (corrs[fB]?.[fA]) continue;
-					const [oA, oB] = arrayOverlap(vA, vB);
-					const corr = getPearsonCorrelation(oA, oB);
-					corrs[fA][fB] = corr ? { corr, n: oA.length } : null;
-				} else if (tA === "number" && tB === "string") {
-					const oA = vA.filter((a) => a);
-					const oB = vB
-						.filter((b, i) => vA[i] !== undefined)
-						.map((b) => b ?? 0);
-
-					const uniqueStrs = [...new Set(oB)].filter(
-						(str) => typeof str === "string"
-					);
-					uniqueStrs.forEach((subF) => {
-						const subA = oA;
-						const subB = oB.map((b) => (b === subF ? 1 : 0));
-
-						const corr = getPointBiserialCorrelation(subB, subA);
-						corrs[fA][fB + "." + subF] = corr
-							? { corr, n: subA.length }
-							: null;
-					});
-				} else if (tA === "number" && tB === "object") {
-					const oA = vA.filter((a) => a);
-					const oB = (vB as string[][]).filter(
-						(b, i) => vA[i] !== undefined
-					);
-
-					const uniqueStrs = [...new Set(oB.flat())].filter(
-						(str) => typeof str === "string"
-					);
-					uniqueStrs.forEach((subF) => {
-						const subA = oA;
-						const subB = oB.map((b) =>
-							b && b.includes(subF) ? 1 : 0
-						);
-						const corr = getPointBiserialCorrelation(subB, subA);
-						corrs[fA][fB + "." + subF] = corr
-							? { corr, n: subA.length }
-							: null;
-					});
-				} else if (tA === "string" && tB === "string") {
-					corrs[fA][fB] = null;
-				} else if (tA === "string" && tB === "number") {
-				} else if (tA === "string" && tB === "object") {
-					corrs[fA][fB] = null;
-				} else if (tA === "object" && tB === "object") {
-					corrs[fA][fB] = null;
-				} else if (tA === "object" && tB === "number") {
-				} else if (tA === "object" && tB === "string") {
-					corrs[fA][fB] = null;
-				}
-			}
-		}
-		console.log({ corrs });
-		return corrs;
-	}
-
-	// getAllCorrsForField(fieldA: string) {
-	// 	const { data } = this.index;
-	// 	const { fieldsToCheck } = this.settings;
-	// 	const correlations = {};
-
-	// 	const fieldsForA = this.allUniqueValuesForField(fieldA);
-
-	// 	fieldsToCheck.forEach((fieldB) => {
-	// 		const fieldsForB = this.allUniqueValuesForField(fieldB);
-
-	// 		const valsInCommon: {
-	// 			[fieldA: string]: {
-	// 				[fieldB: string]: [
-	// 					string | number | string[],
-	// 					string | number | string[]
-	// 				];
-	// 			};
-	// 		} = {};
-
-	// 		if (!valsInCommon.hasOwnProperty(fieldA)) {
-	// 			valsInCommon[fieldA] = {};
-	// 		}
-	// 		const valsA = data.map((d) => d[fieldA]);
-	// 		const valsB = data.map((d) => d[fieldB]);
-
-	// 		valsA.forEach((valA) => {
-	// 			if (typeof valA === "string") {
-	// 				// valsInCommon[fieldA + valA] = valA;
-	// 			}
-	// 		});
-	// 		valsInCommon[fieldA][fieldB] = [valsA, valsB];
-
-	// 		// for (const fieldA in valsInCommon) {
-	// 		// 	for (const fieldB in valsInCommon) {
-	// 		// 		const [valA, valB] = valsInCommon[fieldA][fieldB];
-	// 		// 		[valA, valB].forEach((val, i) => {
-	// 		// 			const arr = makeArr(val);
-	// 		// 			if (typeof arr[0] === "string") {
-	// 		// 				valsInCommon[fieldA][fieldB][i] = arr.map((x) => {
-	// 		// 					if (i === 0)
-	// 		// 						return fieldsForA.includes(x) ? 1 : 0;
-	// 		// 					else return fieldsForB.includes(x) ? 1 : 0;
-	// 		// 				});
-	// 		// 			}
-	// 		// 		});
-	// 		// 	}
-	// 		// }
-	// 		console.log(valsInCommon);
-	// 	});
-	// }
 
 	async createJSDF() {
 		const { settings } = this;
