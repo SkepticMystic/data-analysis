@@ -15,9 +15,9 @@
 
 	const ariaShowText = (show: boolean): string => {
 		if (show) {
-			"Hide section";
+			return "Hide section";
 		}
-		return "Show/hide section";
+		return "Show section";
 	}
 
 </script>
