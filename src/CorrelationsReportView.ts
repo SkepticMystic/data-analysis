@@ -5,7 +5,12 @@ import { CORRELATION_REPORT_VIEW } from "./const";
 import { buildAllCorrelations } from "./correlationUtils";
 import { PrintableCorrelation } from "./interfaces";
 import type DataAnalysisPlugin from "./main";
-import { buildReportCorrs, top3NegativeCorrs, top3PositiveCorrs, ALL_FIELDS } from "./reportViewUtils";
+import {
+	ALL_FIELDS,
+	buildReportCorrs,
+	top3NegativeCorrs,
+	top3PositiveCorrs,
+} from "./reportViewUtils";
 
 export default class CorrelationView extends ItemView {
 	plugin: DataAnalysisPlugin;
@@ -23,7 +28,7 @@ export default class CorrelationView extends ItemView {
 	showMedium: boolean;
 	showWeak: boolean;
 	corrsToShow: PrintableCorrelation[];
- 	topPos3: PrintableCorrelation[];
+	topPos3: PrintableCorrelation[];
 	topNeg3: PrintableCorrelation[];
 	selectedField: string;
 	fieldOptions: string[];
@@ -45,7 +50,7 @@ export default class CorrelationView extends ItemView {
 		this.topPos3 = [];
 		this.topNeg3 = [];
 		this.selectedField = ALL_FIELDS;
-		this.fieldOptions = [ALL_FIELDS, ...plugin.settings.fieldsToCheck]
+		this.fieldOptions = [ALL_FIELDS, ...plugin.settings.fieldsToCheck];
 		this.calculateReport();
 	}
 
@@ -63,7 +68,12 @@ export default class CorrelationView extends ItemView {
 	icon = addFeatherIcon("trending-up") as string;
 
 	calculateReport = () => {
-		this.corrsToShow = buildReportCorrs(this.plugin.index.corrs, this.selectedField, this.max, this.min);
+		this.corrsToShow = buildReportCorrs(
+			this.plugin.index.corrs,
+			this.selectedField,
+			this.max,
+			this.min
+		);
 		this.topPos3 = top3PositiveCorrs(this.corrsToShow);
 		this.topNeg3 = top3NegativeCorrs(this.corrsToShow);
 	};
@@ -88,10 +98,11 @@ export default class CorrelationView extends ItemView {
 			{ text: "↻", attr: { "aria-label": "Refresh Index & Redraw" } },
 			(but) => {
 				but.onclick = async () => {
-					await plugin.refreshIndex(
-						this.app.plugins.plugins.dataview.api
+					await plugin.refreshIndex();
+					plugin.index.corrs = buildAllCorrelations(
+						plugin.index.data,
+						plugin.settings.fieldsToCheck
 					);
-					plugin.index.corrs = buildAllCorrelations(plugin.index.data, plugin.settings.fieldsToCheck);
 					await this.draw();
 				};
 			}
