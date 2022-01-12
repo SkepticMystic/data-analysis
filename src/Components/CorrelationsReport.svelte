@@ -100,28 +100,18 @@
 			</h3>
 			{#if view.showTopPos}
 				<table class="markdown-preview-view">
-			<thead>
-				<tr>
-					<th></th>
-					<th>Field 1</th>
-					<th>Field 2</th>
-					<th>Correlation</th>
-				</tr>
-			</thead>
-			{#each view.topPos3 as { fieldA, fieldB, info: { corr, n }}, index}
-				<tr
+					{#each view.topPos3 as { fieldA, fieldB, info: { corr, n } }}
+						<tr
 							aria-label={ariaN(n)}
 							on:contextmenu={(e) =>
 								menuForChartNStatsModal(e, plugin)}
-								menuForChartNStatsModal(e, plugin)}
 						>
-					<td>{fieldA}</td>
-					<td>{fieldB}</td>
-					<td>{corr.toFixed(4)}</td>
-				</tr>
-			{/each}
-		</table>
-		{/if}
+							<td>{fieldA}</td>
+							<td>{fieldB}</td>
+							<td>{corr.toFixed(4)}</td>
+						</tr>
+					{/each}
+				</table>
 		{/key}
 
 			{#key view.min}
@@ -135,25 +125,19 @@
 					</button>
 				</h3>
 				{#if view.showTopNeg}
-			<thead>
-				<tr>
-					<th></th>
-					<th>Field 1</th>
-					<th>Field 2</th>
-					<th>Correlation</th>
-				</tr>
-			</thead>
-			{#each view.topNeg3 as { fieldA, fieldB, info: { corr, n }}, index}
-				<tr
+					<table class="markdown-preview-view">
+						{#each view.topNeg3 as { fieldA, fieldB, info: { corr, n } }}
+							<tr
 								aria-label={ariaN(n)}
-					<td>{index}</td>
-					<td>{fieldA}</td>
-					<td>{fieldB}</td>
-					<td>{corr.toFixed(4)}</td>
-				</tr>
-			{/each}
-		</table>
-		{/if}
+								on:contextmenu={(e) =>
+									menuForChartNStatsModal(e, plugin)}
+							>
+								<td>{fieldA}</td>
+								<td>{fieldB}</td>
+								<td>{corr.toFixed(4)}</td>
+							</tr>
+						{/each}
+					</table>
 		{/key}
 
 					<h3>
@@ -165,16 +149,9 @@
 						>
 							{getButtonText(view.showStrong)}
 						</button>
-			<thead>
-				<tr>
-					<th>Field 1</th>
-					<th>Field 2</th>
-					<th>Correlation</th>
-				</tr>
-			</thead>
-
-			<tbody>
-				{#each view.corrsToShow as { fieldA, fieldB, info: { corr, n } }}
+					</h3>
+					{#if view.showStrong}
+						<table class="markdown-preview-view">
 					{#if (Math.abs(corr) >= view.medium)}
 						<tr
 							aria-label={n ? "n: " + n.toFixed() : ""}
