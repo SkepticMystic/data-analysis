@@ -36,29 +36,57 @@
 			</button>
 		</h3>
 		{#if view.showStandards}
-		<u>Max Correlation: </u>
-		<input value="{view.max}" on:change={(e) => {view.max = parseFloat(e.target.value); view.calculateReport();}}>
-	</div>
-	<div>
-		<u>Min Correlation: </u>
-		<input value="{view.min}" on:change={(e) => {view.min = parseFloat(e.target.value); view.calculateReport();}}>
-	</div>
-	<div>
-		<u>Strong Correlation: </u>
-		<span>{"|r| >= "}<input value="{view.medium}" on:change={(e) => {view.medium = parseFloat(e.target.value); view.calculateReport();}}></span>
-	</div>
-	<br/>
-	<div>
-		<u>Medium Correlation: </u>
-		<span>{view.lower + " < |r| < " + view.medium}</span>
-	</div>
-	<br/>
-	<div>
-		<u>Weak/No Correlation: </u>
-		<span>{"|r| =< "}<input value="{view.lower}" on:change={(e) => {view.lower = parseFloat(e.target.value); view.calculateReport();}}></span>
-	</div>
-	{/if}
-	{/key}
+			<div>
+				<strong>Max: </strong>
+				<input
+					value={view.max}
+					on:change={(e) => {
+						view.max = parseFloat(e.target.value);
+						view.calculateReport();
+					}}
+				/>
+			</div>
+			<div>
+				<strong>Min: </strong>
+				<input
+					value={view.min}
+					on:change={(e) => {
+						view.min = parseFloat(e.target.value);
+						view.calculateReport();
+					}}
+				/>
+			</div>
+			<div>
+				<strong>Strong: </strong>
+				<span
+					>{"|r| >= "}<input
+						value={view.medium}
+						on:change={(e) => {
+							view.medium = parseFloat(e.target.value);
+							view.calculateReport();
+						}}
+					/></span
+				>
+			</div>
+			<br />
+			<div>
+				<strong>Medium: </strong>
+				<span>{view.lower + " < |r| < " + view.medium}</span>
+			</div>
+			<br />
+			<div>
+				<strong>Weak/No: </strong>
+				<span
+					>{"|r| =< "}<input
+						value={view.lower}
+						on:change={(e) => {
+							view.lower = parseFloat(e.target.value);
+							view.calculateReport();
+						}}
+					/></span
+				>
+			</div>
+		{/if}
 
 		{#key view.max}
 			<h3>
