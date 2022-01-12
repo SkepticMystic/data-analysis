@@ -5,7 +5,7 @@
 ### Features
 
 * :sparkles: Allow other splitters in splitAndTrim ([278e43b](https://github.com/SkepticMystic/data-analysis/commit/278e43b542f5c6417791ad30c9a329f6fc9db98f))
-
+* :sparkles: Summary report view!
 
 ### Documentation
 
