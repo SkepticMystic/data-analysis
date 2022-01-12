@@ -1,6 +1,8 @@
 <script lang="ts">
 	import CorrelationsReportView from "../CorrelationsReportView";
 	import { menuForChartNStatsModal } from "../utils";
+	import Header from "./CorrTableHeader.svelte";
+	import Body from "./CorrTableBody.svelte";
 
 	export let view: CorrelationsReportView;
 
@@ -100,6 +102,7 @@
 			</h3>
 			{#if view.showTopPos}
 				<table class="markdown-preview-view">
+					<Header />
 					{#each view.topPos3 as { fieldA, fieldB, info: { corr, n } }}
 						<tr
 							aria-label={ariaN(n)}
@@ -126,6 +129,7 @@
 				</h3>
 				{#if view.showTopNeg}
 					<table class="markdown-preview-view">
+						<Header />
 						{#each view.topNeg3 as { fieldA, fieldB, info: { corr, n } }}
 							<tr
 								aria-label={ariaN(n)}
@@ -153,21 +157,34 @@
 					</h3>
 					{#if view.showStrong}
 						<table class="markdown-preview-view">
-					{#if (Math.abs(corr) >= view.medium)}
-						<tr
-							aria-label={n ? "n: " + n.toFixed() : ""}
-							on:contextmenu={(e) =>
-								menuForChartNStatsModal(e, plugin)}
-						>
-							<td>{fieldA}</td>
-							<td>{fieldB}</td>
-							<td>{corr.toFixed(4)}</td>
-						</tr>
-					{/if}
-				{/each}
+							<Header />
+							<Body
+								{view}
+								criteria={(corr) =>
+									Math.abs(corr) >= view.medium}
+							/>
+							<!-- <tbody>
+								{#each view.corrsToShow as { fieldA, fieldB, info: { corr, n } }}
+									{#if Math.abs(corr) >= view.medium}
+										<tr
+											aria-label={ariaN(n)}
+											on:contextmenu={(e) =>
+												menuForChartNStatsModal(
+													e,
+													plugin
+												)}
+										>
+											<td>{fieldA}</td>
+											<td>{fieldB}</td>
+											<td>{corr.toFixed(4)}</td>
+										</tr>
+									{/if}
+								{/each}
+							</tbody> -->
 						</table>
-		{/key}
+					{/if}
 
+					<h3>
 						Somewhat Correlated
 						<button
 							on:click={() =>
@@ -179,28 +196,31 @@
 					</h3>
 					{#if view.showMedium}
 						<table class="markdown-preview-view">
-			<thead>
-				<tr>
-					<th>Field 1</th>
-					<th>Field 2</th>
-					<th>Correlation</th>
-				</tr>
-			</thead>
-
-			<tbody>
-				{#each view.corrsToShow as { fieldA, fieldB, info: { corr, n } }}
-					{#if (Math.abs(corr) < view.medium && Math.abs(corr) > view.lower)}
-						<tr
-							aria-label={n ? "n: " + n.toFixed() : ""}
-							on:contextmenu={(e) =>
-								menuForChartNStatsModal(e, plugin)}
-						>
-							<td>{fieldA}</td>
-							<td>{fieldB}</td>
-							<td>{corr.toFixed(4)}</td>
-						</tr>
-					{/if}
-				{/each}
+							<Header />
+							<Body
+								{view}
+								criteria={(corr) =>
+									Math.abs(corr) < view.medium &&
+									Math.abs(corr) > view.lower}
+							/>
+							<!-- <tbody>
+								{#each view.corrsToShow as { fieldA, fieldB, info: { corr, n } }}
+									{#if Math.abs(corr) < view.medium && Math.abs(corr) > view.lower}
+										<tr
+											aria-label={ariaN(n)}
+											on:contextmenu={(e) =>
+												menuForChartNStatsModal(
+													e,
+													plugin
+												)}
+										>
+											<td>{fieldA}</td>
+											<td>{fieldB}</td>
+											<td>{corr.toFixed(4)}</td>
+										</tr>
+									{/if}
+								{/each}
+							</tbody> -->
 						</table>
 					{/if}
 
@@ -215,6 +235,11 @@
 					</h3>
 					{#if view.showWeak}
 						<table class="markdown-preview-view">
+							<Header />
+							<Body
+								{view}
+								criteria={(corr) => Math.abs(corr) < view.lower}
+							/>
 							<tbody>
 								{#each view.corrsToShow as { fieldA, fieldB, info: { corr, n } }}
 									{#if Math.abs(corr) < view.lower}
