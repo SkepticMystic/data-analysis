@@ -1,3 +1,4 @@
+.fields-to-skip textarea,
 .fields-to-check textarea {
 	width: 200px;
 	height: 200px;

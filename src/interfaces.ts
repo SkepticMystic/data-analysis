@@ -2,14 +2,17 @@ import { Link } from "obsidian-dataview";
 
 export interface Correlations {
 	[field: string]: {
-		[field: string]: Correlation
+		[field: string]: Correlation;
 	};
 }
 
-export interface PrintableCorrelation { fieldA: string, fieldB: string, info: Correlation }
+export interface PrintableCorrelation {
+	fieldA: string;
+	fieldB: string;
+	info: Correlation;
+}
 
-
-export interface Correlation{
+export interface Correlation {
 	/** Pearson or Biserial Correlation based on input types */
 	corr: number;
 	/** Samples size */
@@ -18,6 +21,7 @@ export interface Correlation{
 
 export interface Settings {
 	fieldsToCheck: string[];
+	fieldsToIgnoreForCorrs: [string, string][];
 	fieldLists: string[];
 	dateFormat: string;
 	defaultSavePath: string;

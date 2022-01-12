@@ -4,6 +4,8 @@ import { splitAndTrim } from "./correlationUtils";
 import DataAnalysisPlugin from "./main";
 import { toKebabCase } from "./utils";
 
+const fragWithHTML = (html: string) =>
+	createFragment((frag) => (frag.createDiv().innerHTML = html));
 export class SettingTab extends PluginSettingTab {
 	plugin: DataAnalysisPlugin;
 
@@ -56,6 +58,10 @@ export class SettingTab extends PluginSettingTab {
 									.includes(field)
 							) {
 								settings.fieldsToCheck.push(field);
+								settings.fieldsToCheck =
+									settings.fieldsToCheck.sort((a, b) =>
+										a.localeCompare(b)
+									);
 								await plugin.saveSettings();
 							}
 						}
@@ -80,6 +86,38 @@ export class SettingTab extends PluginSettingTab {
 					await plugin.refreshIndex();
 				};
 			});
+		new Setting(containerEl)
+			.setClass("fields-to-skip")
+			.setName("Fields to Check Skip in Correlations")
+			.setDesc(
+				fragWithHTML(
+					`A list of pairs of fields to NOT show in the Correlations View. Enter each pair on a new line, with each pair separated by a comma.</br>
+					For example:
+					<pre><code>
+					a, b
+					c, d
+					</code></pre>`
+				)
+			)
+			.addTextArea((text) => {
+				text.setValue(
+					settings.fieldsToIgnoreForCorrs
+						.map((pair) => pair.join(", "))
+						.join("\n")
+				);
+				text.inputEl.onblur = async () => {
+					const value = text.getValue();
+					const splits = value.split("\n").map(splitAndTrim) as [
+						string,
+						string
+					][];
+
+					settings.fieldsToIgnoreForCorrs = splits;
+					await plugin.saveSettings();
+					await plugin.refreshIndex();
+				};
+			});
+
 		new Setting(containerEl)
 			.setName("Date Format")
 			.setDesc("The date format you use in your vault.")

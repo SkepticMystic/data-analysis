@@ -12,6 +12,7 @@ export const DECIMALS = 4;
 
 export const DEFAULT_SETTINGS: Settings = {
 	fieldsToCheck: [],
+	fieldsToIgnoreForCorrs: [],
 	fieldLists: [],
 	dateFormat: "YYYY-MM-DD",
 	defaultSavePath: "/",
