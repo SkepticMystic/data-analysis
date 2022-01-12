@@ -112,7 +112,7 @@
 						</tr>
 					{/each}
 				</table>
-		{/key}
+			{/if}
 
 			{#key view.min}
 				<h3>
@@ -138,8 +138,9 @@
 							</tr>
 						{/each}
 					</table>
-		{/key}
+				{/if}
 
+				{#key [view.lower, view.medium]}
 					<h3>
 						Strongly Correlated
 						<button
@@ -164,9 +165,7 @@
 						</tr>
 					{/if}
 				{/each}
-			</tbody>
-		</table>
-		{/if}
+						</table>
 		{/key}
 
 						Somewhat Correlated
@@ -235,8 +234,10 @@
 								{/each}
 							</tbody>
 						</table>
-	{/key}
-	{/key}
+					{/if}
+				{/key}
+			{/key}
+		{/key}
 	{/key}
 </div>
 
