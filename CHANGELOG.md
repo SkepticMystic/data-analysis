@@ -1,4 +1,12 @@
 ## Changelog
+### [0.0.22](https://github.com/SkepticMystic/data-analysis/compare/0.0.21...0.0.22) (2022-01-13)
+
+
+### Fixes
+
+* **Correlation Report:** :bug: Remove index col in tables to fix [#36](https://github.com/SkepticMystic/data-analysis/issues/36) ([e66a0eb](https://github.com/SkepticMystic/data-analysis/commit/e66a0eb945c85bd5d983b9b79453d42b3c61fc22))
+* **StatsModal:** :bug: Don't filter out 0's, only undefineds ([6e747be](https://github.com/SkepticMystic/data-analysis/commit/6e747be825e19ed21231eec775ad5570672c3dcf))
+
 ### [0.0.21](https://github.com/SkepticMystic/data-analysis/compare/0.0.20...0.0.21) (2022-01-12)
 
 
