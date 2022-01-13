@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getMean, getMedian, getMode, getStdDev } from "../analyses";
-	import { roundNumber } from "../utils";
 	import { StatsModal } from "../StatsModal";
+	import { roundNumber } from "../utils";
 
 	export let modal: StatsModal;
 
@@ -12,7 +12,9 @@
 	let { f1 } = modal;
 
 	const updateData = (field: string) =>
-		index.data.map((d) => d[field]).filter((d) => d);
+		index.data
+			.map((d) => d[field])
+			.filter((d) => d !== undefined && d !== null);
 
 	$: data = updateData(f1);
 	$: n = data.length;
