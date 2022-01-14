@@ -112,9 +112,9 @@
 
 			<tbody>
 				{#key absQ}
-						{#each corrsToShow as { fA, fB, info: { corr, n } }}
-							{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && lower <= corr && corr <= upper}
-								<!-- svelte-ignore a11y-unknown-aria-attribute -->
+					{#each corrsToShow as { fA, fB, info: { corr, n } }}
+						{#if (fieldsInFile.includes(fA) || (fB.includes(".") && fieldsInFile.includes(fB))) && lower <= corr && corr <= upper}
+							<!-- svelte-ignore a11y-unknown-aria-attribute -->
 							<tr
 								aria-label={n ? "n: " + n.toFixed() : ""}
 								aria-label-position="left"
