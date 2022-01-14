@@ -56,3 +56,5 @@ export const top3NegativeCorrs = (
 	}
 	return correlations.slice(-3);
 };
+
+export const ariaN = (n: number) => (n ? "n: " + n.toFixed() : "");

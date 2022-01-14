@@ -33,9 +33,10 @@
 			</button>
 		</h3>
 		{#if view.showStandards}
-			<div>
+			<div class="standard">
 				<strong>Max: </strong>
 				<input
+					type="number"
 					value={view.max}
 					on:change={(e) => {
 						view.max = parseFloat(e.target.value);
@@ -43,9 +44,10 @@
 					}}
 				/>
 			</div>
-			<div>
+			<div class="standard">
 				<strong>Min: </strong>
 				<input
+					type="number"
 					value={view.min}
 					on:change={(e) => {
 						view.min = parseFloat(e.target.value);
@@ -53,33 +55,30 @@
 					}}
 				/>
 			</div>
-			<div>
-				<strong>Strong: </strong>
-				<span
-					>{"|r| >= "}<input
-						value={view.medium}
-						on:change={(e) => {
-							view.medium = parseFloat(e.target.value);
-							view.calculateReport();
-						}}
-					/></span
-				>
+			<div class="standard">
+				<strong>Strong: </strong>{"|r| >= "}<input
+					type="number"
+					value={view.medium}
+					on:change={(e) => {
+						view.medium = parseFloat(e.target.value);
+						view.calculateReport();
+					}}
+				/>
 			</div>
-			<br />
-			<div>
+			<div class="standard">
 				<strong>Medium: </strong>
-				<span>{view.lower + " < |r| < " + view.medium}</span>
+				{view.lower + " < |r| < " + view.medium}
 			</div>
-			<br />
-			<div>
-				<strong>Weak/No: </strong>
-				<span
-					>{"|r| =< "}<input
-						value={view.lower}
-						on:change={(e) => {
-							view.lower = parseFloat(e.target.value);
-							view.calculateReport();
-						}}
+			<div class="standard">
+				<strong>Weak/No: </strong>{"|r| =< "}<input
+					type="number"
+					value={view.lower}
+					on:change={(e) => {
+						view.lower = parseFloat(e.target.value);
+						view.calculateReport();
+					}}
+				/>
+			</div>
 			<div class="standard">
 				<strong>Min sample size: </strong>
 				{"n >= "}<input
@@ -198,6 +197,10 @@
 <style>
 	div.component {
 		padding: 5px;
+	}
+
+	div.standard {
+		padding: 3px;
 	}
 
 	table {

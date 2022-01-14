@@ -39,8 +39,8 @@ export default class CorrelationView extends ItemView {
 		this.plugin = plugin;
 		this.lower = 0.5;
 		this.medium = 0.75;
-		this.max = Infinity;
-		this.min = -Infinity;
+		this.max = 9999;
+		this.min = -9999;
 		this.showStandards = true;
 		this.showTopPos = true;
 		this.showTopNeg = true;
