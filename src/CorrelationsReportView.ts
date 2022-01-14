@@ -101,8 +101,10 @@ export default class CorrelationView extends ItemView {
 					await plugin.refreshIndex();
 					plugin.index.corrs = buildAllCorrelations(
 						plugin.index.data,
-						plugin.settings.fieldsToCheck
+						plugin.settings.fieldsToCheck,
+						plugin.settings.fieldsToIgnoreForCorrs
 					);
+					this.calculateReport();
 					await this.draw();
 				};
 			}
