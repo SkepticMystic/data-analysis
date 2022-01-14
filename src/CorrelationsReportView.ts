@@ -27,6 +27,7 @@ export default class CorrelationView extends ItemView {
 	showStrong: boolean;
 	showMedium: boolean;
 	showWeak: boolean;
+	minN: number;
 	corrsToShow: PrintableCorrelation[];
 	topPos3: PrintableCorrelation[];
 	topNeg3: PrintableCorrelation[];
@@ -46,6 +47,7 @@ export default class CorrelationView extends ItemView {
 		this.showStrong = true;
 		this.showMedium = true;
 		this.showWeak = false;
+		this.minN = 1;
 		this.corrsToShow = [];
 		this.topPos3 = [];
 		this.topNeg3 = [];

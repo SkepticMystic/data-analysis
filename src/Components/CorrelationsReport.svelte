@@ -80,8 +80,16 @@
 							view.lower = parseFloat(e.target.value);
 							view.calculateReport();
 						}}
-					/></span
-				>
+			<div class="standard">
+				<strong>Min sample size: </strong>
+				{"n >= "}<input
+					type="number"
+					value={view.minN}
+					on:change={(e) => {
+						view.minN = parseFloat(e.target.value);
+						view.calculateReport();
+					}}
+				/>
 			</div>
 		{/if}
 
