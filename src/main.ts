@@ -2,7 +2,6 @@ import { Parser, transforms } from "json2csv";
 import { DateTime } from "luxon";
 import { normalizePath, Notice, Plugin } from "obsidian";
 import { openView } from "obsidian-community-lib";
-import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
 import {
 	CORRELATION_REPORT_VIEW,
@@ -119,8 +118,8 @@ export default class DataAnalysisPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "write-metadataframe",
-			name: "Write Metadataframe",
+			id: "export-data",
+			name: "Export Data",
 			callback: async () => {
 				try {
 					const jsDF = await this.createJSDF();
@@ -301,7 +300,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			const content = await this.app.vault.cachedRead(file);
 			const lines = content.split("\n");
 			lines.forEach((line) => {
-				const field = line.startsWith("[[") ? line.slice(2, -2) : line;
+				const field = dropWiki(line);
 				if (!fieldsToCheck.includes(field)) fieldsToCheck.push(field);
 			});
 			this.settings.fieldsToCheck = fieldsToCheck;
@@ -311,7 +310,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		let pages: { [field: string]: any }[] = dvApi.pages().values;
 		const result = processPages(pages, fieldsToCheck);
 
-		this.unwrapStrLists(result.pages);
+		await this.unwrapStrLists(result.pages);
 
 		this.index.data = result.pages;
 		this.index.minDate = DateTime.min(...result.dates);
@@ -324,8 +323,13 @@ export default class DataAnalysisPlugin extends Plugin {
 	allUniqueValuesForField(field: string) {
 		const values: any[] = [];
 		this.index.data.forEach((page) => {
-			const value = page[field];
-			if (value) values.push(...makeArr(value));
+			if (page[field]) {
+				const value = unproxy(page[field]);
+				makeArr(value).forEach((v) => {
+					if (typeof value === "string") values.push(v);
+					else if (v.path) values.push(v.path);
+				});
+			}
 		});
 
 		return [...new Set([...values])];
@@ -361,22 +365,22 @@ export default class DataAnalysisPlugin extends Plugin {
 			fieldsToCheck,
 		} = settings;
 
-		let table: Row[] = [];
-		let uniqueKeys: string[] = [];
+		const table: Row[] = [];
+		const uniqueKeys: string[] = [];
 
 		let actualNullValue = stringToNullOrUndefined(nullValue);
 
 		for (const page of this.index.data) {
 			const { file } = page;
 
-			const currRow = { file: { path: file.path }, content: "" };
+			const currRow: Row = { file: { path: file.path }, content: "" };
 
 			if (addNoteContent) {
 				const content = await this.app.vault.cachedRead(file);
 				currRow["content"] = content;
 			}
 
-			function updateCell(col: string, currRow: { [col: string]: any }) {
+			function updateCell(col: string, currRow: Row) {
 				if (col !== "position" && (col !== "file" || addFileData)) {
 					const value = page[col];
 					const arrValues = [value].flat(4);
@@ -389,7 +393,6 @@ export default class DataAnalysisPlugin extends Plugin {
 						currRow[col] = actualNullValue;
 					} else if (typeof value === "string") {
 						// String values
-
 						const splits = value.match(splitLinksRegex);
 						if (splits !== null) {
 							// Wikilink-strings
@@ -432,16 +435,25 @@ export default class DataAnalysisPlugin extends Plugin {
 
 			const { unwrappedFields } = this;
 			for (const field in unwrappedFields) {
-				const val = page[field];
-				const subs = unwrappedFields[field];
-				if (val !== null && val !== undefined) {
-					subs.forEach((sub) => {
-						if (val.includes && val.includes(sub))
-							currRow[makeSub(field, sub)] = 1;
-					});
-				} else {
-					subs.forEach((sub) => {
+				const allVals = this.allUniqueValuesForField(field);
+				const cell = page[field];
+
+				if (cell !== null && cell !== undefined) {
+					const unproxieds = unproxy(cell);
+
+					allVals.forEach((sub) => {
 						currRow[makeSub(field, sub)] = 0;
+
+						[unproxieds].flat().forEach((unproxied) => {
+							if (typeof unproxied === "string") {
+								splitAndTrim(unproxied).forEach(
+									(split) =>
+										(currRow[makeSub(field, split)] = 1)
+								);
+							} else if (typeof unproxied.path === "string") {
+								currRow[makeSub(field, unproxied.path)] = 1;
+							}
+						});
 					});
 				}
 			}
