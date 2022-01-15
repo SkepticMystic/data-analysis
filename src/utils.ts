@@ -133,3 +133,6 @@ export function menuForChartNStatsModal(
 	}
 	menu.showAtMouseEvent(event);
 }
+
+export const dropWiki = (str: string) =>
+	str.startsWith("[[") && str.endsWith("]]") ? str.slice(2, -2) : str;

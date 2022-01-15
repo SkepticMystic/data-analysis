@@ -12,12 +12,24 @@ import {
 	splitLinksRegex,
 } from "./const";
 import CorrelationsReportView from "./CorrelationsReportView";
-import { buildAllCorrelations, processPages } from "./correlationUtils";
+import {
+	buildAllCorrelations,
+	processPages,
+	unproxy,
+} from "./correlationUtils";
 import CorrelationView from "./CorrelationView";
-import { Correlations, DataType, Row, Settings } from "./interfaces";
+import {
+	Correlations,
+	DataType,
+	PresetField,
+	Row,
+	Settings,
+	SuperchargedField,
+} from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
 import {
+	dropWiki,
 	makeArr,
 	makeSub,
 	splitAndTrim,
@@ -200,37 +212,77 @@ export default class DataAnalysisPlugin extends Plugin {
 				return unproxied.map((link) => link.path);
 			} else return unproxied;
 		}
-		this.app.workspace
-			.getLeavesOfType(CORRELATION_REPORT_VIEW)
-			.forEach((leaf) => leaf.detach());
 	}
 
-	unwrapStrLists(data: { [field: string]: any }[]) {
+	async getSuperchargedFields(): Promise<SuperchargedField[]> {
+		const { app, settings } = this;
+
+		const presetFields: PresetField[] =
+			app.plugins.plugins["supercharged-links-obsidian"]?.settings
+				.presetFields;
+
+		if (!presetFields) return null;
+		return Promise.all(
+			presetFields.map(async (field) => {
+				const { valuesListNotePath, values, name } = field;
+				const newValues: string[] = Object.values(values);
+
+				if (valuesListNotePath) {
+					const file = this.app.metadataCache.getFirstLinkpathDest(
+						valuesListNotePath,
+						""
+					);
+					if (!file) return;
+					const content = await this.app.vault.cachedRead(file);
+					const lines = content.split("\n");
+
+					lines.forEach((line) => newValues.push(line));
+				}
+
+				return { name, values: newValues };
+			})
+		);
+	}
+
+	// It needs to take in data as an argument, because this function is called before data is finished initialising
+	async unwrapStrLists(data: { [field: string]: any }[]) {
 		const { unwrappedFields } = this;
 		const { fieldsToCheck } = this.settings;
 
-		for (const field of fieldsToCheck) {
-			unwrappedFields[field] = [];
-			data.forEach((d) => {
-				const val = d[field];
-				if (val) {
+		const scFields = await this.getSuperchargedFields();
+
+		if (scFields) {
+			for (const scField of scFields) {
+				const { name, values } = scField;
+				unwrappedFields[name] = [];
+				for (const value of values) {
+					if (value.trim() === "") continue;
+					unwrappedFields[name].push(dropWiki(value));
+				}
+			}
+		} else {
+			for (const field of fieldsToCheck) {
+				unwrappedFields[field] = [];
+				data.forEach((d) => {
+					const cell = d[field];
+
 					// BUG: Don't do this for _every_ string
-					if (typeof val === "string") {
-						d[val] = true;
-						if (!unwrappedFields[field].includes(val))
-							unwrappedFields[field].push(val);
+					if (typeof cell === "string") {
+						d[cell] = true;
+						if (!unwrappedFields[field].includes(cell))
+							unwrappedFields[field].push(cell);
 					} else if (
-						val?.every &&
-						val.every((x: any) => typeof x === "string")
+						cell?.every &&
+						cell.every((x: any) => typeof x === "string")
 					) {
-						val.forEach((str: string) => {
+						cell.forEach((str: string) => {
 							d[str] = true;
 							if (!unwrappedFields[field].includes(str))
 								unwrappedFields[field].push(str);
 						});
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 	async refreshIndex() {
