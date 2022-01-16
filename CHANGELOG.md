@@ -1,4 +1,19 @@
 ## Changelog
+### [0.0.23](https://github.com/SkepticMystic/data-analysis/compare/0.0.22...0.0.23) (2022-01-16)
+
+
+### Features
+
+* **Correlation Report:** :sparkles: Filter by sample size ([#35](https://github.com/SkepticMystic/data-analysis/issues/35)) ([dde62d8](https://github.com/SkepticMystic/data-analysis/commit/dde62d87070125c7e0d6e1b063e5a9a454fd798a))
+* **WriteToCSV:** :sparkles: Use Supercharged Links if available ([33539e7](https://github.com/SkepticMystic/data-analysis/commit/33539e72f2cd1a6447590a028f58721c8a9afcd7))
+* **WriteToCSV:** :sparkles: Write nested fields to CSV ([c19faae](https://github.com/SkepticMystic/data-analysis/commit/c19faaef6bd69eb3fe441dd2f924640aa5457773))
+
+
+### Fixes
+
+* **Correlation Report:** :bug: Support list field values in report dropdown ([77bfd7b](https://github.com/SkepticMystic/data-analysis/commit/77bfd7b1cd3b43c40d9bc044113736475794c287)), closes [#37](https://github.com/SkepticMystic/data-analysis/issues/37)
+* **CorrelationView:** :bug: Don't hide slider value with slider handle (fix [#15](https://github.com/SkepticMystic/data-analysis/issues/15)) ([8f8823c](https://github.com/SkepticMystic/data-analysis/commit/8f8823c456f741a7062d926d298f4ab18f2e8457))
+
 ### [0.0.22](https://github.com/SkepticMystic/data-analysis/compare/0.0.21...0.0.22) (2022-01-13)
 
 
