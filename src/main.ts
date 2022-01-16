@@ -2,7 +2,6 @@ import { Parser, transforms } from "json2csv";
 import { DateTime } from "luxon";
 import { normalizePath, Notice, Plugin } from "obsidian";
 import { openView } from "obsidian-community-lib";
-import { DataviewApi } from "obsidian-dataview";
 import { ChartModal } from "./ChartModal";
 import {
 	CORRELATION_REPORT_VIEW,
@@ -12,12 +11,24 @@ import {
 	splitLinksRegex,
 } from "./const";
 import CorrelationsReportView from "./CorrelationsReportView";
-import { buildAllCorrelations, processPages } from "./correlationUtils";
+import {
+	buildAllCorrelations,
+	processPages,
+	unproxy,
+} from "./correlationUtils";
 import CorrelationView from "./CorrelationView";
-import { Correlations, DataType, Row, Settings } from "./interfaces";
+import {
+	Correlations,
+	DataType,
+	PresetField,
+	Row,
+	Settings,
+	SuperchargedField,
+} from "./interfaces";
 import { SettingTab } from "./SettingTab";
 import { StatsModal } from "./StatsModal";
 import {
+	dropWiki,
 	makeArr,
 	makeSub,
 	splitAndTrim,
@@ -107,8 +118,8 @@ export default class DataAnalysisPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "write-metadataframe",
-			name: "Write Metadataframe",
+			id: "export-data",
+			name: "Export Data",
 			callback: async () => {
 				try {
 					const jsDF = await this.createJSDF();
@@ -200,37 +211,77 @@ export default class DataAnalysisPlugin extends Plugin {
 				return unproxied.map((link) => link.path);
 			} else return unproxied;
 		}
-		this.app.workspace
-			.getLeavesOfType(CORRELATION_REPORT_VIEW)
-			.forEach((leaf) => leaf.detach());
 	}
 
-	unwrapStrLists(data: { [field: string]: any }[]) {
+	async getSuperchargedFields(): Promise<SuperchargedField[]> {
+		const { app, settings } = this;
+
+		const presetFields: PresetField[] =
+			app.plugins.plugins["supercharged-links-obsidian"]?.settings
+				.presetFields;
+
+		if (!presetFields) return null;
+		return Promise.all(
+			presetFields.map(async (field) => {
+				const { valuesListNotePath, values, name } = field;
+				const newValues: string[] = Object.values(values);
+
+				if (valuesListNotePath) {
+					const file = this.app.metadataCache.getFirstLinkpathDest(
+						valuesListNotePath,
+						""
+					);
+					if (!file) return;
+					const content = await this.app.vault.cachedRead(file);
+					const lines = content.split("\n");
+
+					lines.forEach((line) => newValues.push(line));
+				}
+
+				return { name, values: newValues };
+			})
+		);
+	}
+
+	// It needs to take in data as an argument, because this function is called before data is finished initialising
+	async unwrapStrLists(data: { [field: string]: any }[]) {
 		const { unwrappedFields } = this;
 		const { fieldsToCheck } = this.settings;
 
-		for (const field of fieldsToCheck) {
-			unwrappedFields[field] = [];
-			data.forEach((d) => {
-				const val = d[field];
-				if (val) {
+		const scFields = await this.getSuperchargedFields();
+
+		if (scFields) {
+			for (const scField of scFields) {
+				const { name, values } = scField;
+				unwrappedFields[name] = [];
+				for (const value of values) {
+					if (value.trim() === "") continue;
+					unwrappedFields[name].push(dropWiki(value));
+				}
+			}
+		} else {
+			for (const field of fieldsToCheck) {
+				unwrappedFields[field] = [];
+				data.forEach((d) => {
+					const cell = d[field];
+
 					// BUG: Don't do this for _every_ string
-					if (typeof val === "string") {
-						d[val] = true;
-						if (!unwrappedFields[field].includes(val))
-							unwrappedFields[field].push(val);
+					if (typeof cell === "string") {
+						d[cell] = true;
+						if (!unwrappedFields[field].includes(cell))
+							unwrappedFields[field].push(cell);
 					} else if (
-						val?.every &&
-						val.every((x: any) => typeof x === "string")
+						cell?.every &&
+						cell.every((x: any) => typeof x === "string")
 					) {
-						val.forEach((str: string) => {
+						cell.forEach((str: string) => {
 							d[str] = true;
 							if (!unwrappedFields[field].includes(str))
 								unwrappedFields[field].push(str);
 						});
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 	async refreshIndex() {
@@ -249,7 +300,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			const content = await this.app.vault.cachedRead(file);
 			const lines = content.split("\n");
 			lines.forEach((line) => {
-				const field = line.startsWith("[[") ? line.slice(2, -2) : line;
+				const field = dropWiki(line);
 				if (!fieldsToCheck.includes(field)) fieldsToCheck.push(field);
 			});
 			this.settings.fieldsToCheck = fieldsToCheck;
@@ -259,7 +310,7 @@ export default class DataAnalysisPlugin extends Plugin {
 		let pages: { [field: string]: any }[] = dvApi.pages().values;
 		const result = processPages(pages, fieldsToCheck);
 
-		this.unwrapStrLists(result.pages);
+		await this.unwrapStrLists(result.pages);
 
 		this.index.data = result.pages;
 		this.index.minDate = DateTime.min(...result.dates);
@@ -272,8 +323,13 @@ export default class DataAnalysisPlugin extends Plugin {
 	allUniqueValuesForField(field: string) {
 		const values: any[] = [];
 		this.index.data.forEach((page) => {
-			const value = page[field];
-			if (value) values.push(...makeArr(value));
+			if (page[field]) {
+				const value = unproxy(page[field]);
+				makeArr(value).forEach((v) => {
+					if (typeof value === "string") values.push(v);
+					else if (v.path) values.push(v.path);
+				});
+			}
 		});
 
 		return [...new Set([...values])];
@@ -309,22 +365,22 @@ export default class DataAnalysisPlugin extends Plugin {
 			fieldsToCheck,
 		} = settings;
 
-		let table: Row[] = [];
-		let uniqueKeys: string[] = [];
+		const table: Row[] = [];
+		const uniqueKeys: string[] = [];
 
 		let actualNullValue = stringToNullOrUndefined(nullValue);
 
 		for (const page of this.index.data) {
 			const { file } = page;
 
-			const currRow = { file: { path: file.path }, content: "" };
+			const currRow: Row = { file: { path: file.path }, content: "" };
 
 			if (addNoteContent) {
 				const content = await this.app.vault.cachedRead(file);
 				currRow["content"] = content;
 			}
 
-			function updateCell(col: string, currRow: { [col: string]: any }) {
+			function updateCell(col: string, currRow: Row) {
 				if (col !== "position" && (col !== "file" || addFileData)) {
 					const value = page[col];
 					const arrValues = [value].flat(4);
@@ -337,7 +393,6 @@ export default class DataAnalysisPlugin extends Plugin {
 						currRow[col] = actualNullValue;
 					} else if (typeof value === "string") {
 						// String values
-
 						const splits = value.match(splitLinksRegex);
 						if (splits !== null) {
 							// Wikilink-strings
@@ -380,16 +435,25 @@ export default class DataAnalysisPlugin extends Plugin {
 
 			const { unwrappedFields } = this;
 			for (const field in unwrappedFields) {
-				const val = page[field];
-				const subs = unwrappedFields[field];
-				if (val !== null && val !== undefined) {
-					subs.forEach((sub) => {
-						if (val.includes && val.includes(sub))
-							currRow[makeSub(field, sub)] = 1;
-					});
-				} else {
-					subs.forEach((sub) => {
+				const allVals = this.allUniqueValuesForField(field);
+				const cell = page[field];
+
+				if (cell !== null && cell !== undefined) {
+					const unproxieds = unproxy(cell);
+
+					allVals.forEach((sub) => {
 						currRow[makeSub(field, sub)] = 0;
+
+						[unproxieds].flat().forEach((unproxied) => {
+							if (typeof unproxied === "string") {
+								splitAndTrim(unproxied).forEach(
+									(split) =>
+										(currRow[makeSub(field, split)] = 1)
+								);
+							} else if (typeof unproxied.path === "string") {
+								currRow[makeSub(field, unproxied.path)] = 1;
+							}
+						});
 					});
 				}
 			}

@@ -36,3 +36,17 @@ export type DataType = number | string | Date | Link;
 export interface Row {
 	[col: string]: any;
 }
+
+export interface SuperchargedField {
+	name: string;
+	values: string[];
+}
+
+export interface PresetField {
+	id: string;
+	isCycle: boolean;
+	isMulti: boolean;
+	name: string;
+	values: { [id: number]: string };
+	valuesListNotePath: string;
+}
