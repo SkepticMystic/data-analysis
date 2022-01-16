@@ -7,6 +7,7 @@ import { PrintableCorrelation } from "./interfaces";
 import type DataAnalysisPlugin from "./main";
 import {
 	ALL_FIELDS,
+	buildDropdownOptionsFromReportCorrs,
 	buildReportCorrs,
 	top3NegativeCorrs,
 	top3PositiveCorrs,
@@ -52,7 +53,7 @@ export default class CorrelationView extends ItemView {
 		this.topPos3 = [];
 		this.topNeg3 = [];
 		this.selectedField = ALL_FIELDS;
-		this.fieldOptions = [ALL_FIELDS, ...plugin.settings.fieldsToCheck];
+		this.fieldOptions = [ALL_FIELDS];
 		this.calculateReport();
 	}
 
@@ -78,6 +79,7 @@ export default class CorrelationView extends ItemView {
 		);
 		this.topPos3 = top3PositiveCorrs(this.corrsToShow);
 		this.topNeg3 = top3NegativeCorrs(this.corrsToShow);
+		this.fieldOptions = [ALL_FIELDS, ...buildDropdownOptionsFromReportCorrs(this.corrsToShow)]
 	};
 
 	async onOpen(): Promise<void> {
@@ -103,8 +105,10 @@ export default class CorrelationView extends ItemView {
 					await plugin.refreshIndex();
 					plugin.index.corrs = buildAllCorrelations(
 						plugin.index.data,
-						plugin.settings.fieldsToCheck
+						plugin.settings.fieldsToCheck,
+						plugin.settings.fieldsToIgnoreForCorrs
 					);
+					this.calculateReport();
 					await this.draw();
 				};
 			}

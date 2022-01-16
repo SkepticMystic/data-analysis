@@ -116,6 +116,7 @@ export const processPages = (
 
 export const buildAllPairs = (
 	items: string[],
+	sortedSkipPairs: string[][],
 	sorted: boolean = false
 ): string[][] => {
 	if (!sorted) {
@@ -123,6 +124,9 @@ export const buildAllPairs = (
 			return a.localeCompare(b);
 		});
 	}
+	const stringifiedSortedSkipPairs = sortedSkipPairs.map((value: string[]) => {
+		return value.toString();
+	})
 
 	let results = [];
 
@@ -135,7 +139,10 @@ export const buildAllPairs = (
 			innerIndex < items.length;
 			innerIndex++
 		) {
-			results.push([first, items[innerIndex]]);
+			const pair = [first, items[innerIndex]];
+			if (!stringifiedSortedSkipPairs.includes(pair.toString())) {
+				results.push([first, items[innerIndex]]);
+			}
 		}
 	}
 	return results;
@@ -152,10 +159,10 @@ export const buildAllDataByFieldsToCheck = (
 	return dataByField;
 };
 
-export const refactoredBuildAllCorrelations = (
+export const buildAllCorrelations = (
 	data: { [field: string]: DataType }[],
 	fieldsToCheck: string[],
-	pairsToSkip: string[][] = [],
+	pairsToSkip: string[][],
 	debugMode: boolean = false
 ): Correlations => {
 	// Alphabetize fieldsToCheck list. This makes it easier to keep track of the correlation pairs.
@@ -176,9 +183,7 @@ export const refactoredBuildAllCorrelations = (
 	const dataByField = buildAllDataByFieldsToCheck(data, fieldsToCheck);
 
 	// Build all correlation pairs. Filter out any of the skip pairs.
-	const pairs = buildAllPairs(fieldsToCheck, true).filter(
-		(value: string[]) => !alphabetizedSkipPairs.includes(value)
-	);
+	let pairs = buildAllPairs(fieldsToCheck, alphabetizedSkipPairs, true);
 
 	for (const pair of pairs) {
 		const fieldA = pair[0];
@@ -323,80 +328,5 @@ export const buildCorrelation = (
 		corrs[fieldA][fieldB] = null;
 	}
 
-	return corrs;
-};
-
-export const buildAllCorrelations = (
-	data: { [field: string]: DataType }[],
-	fieldsToCheck: string[],
-	debugMode: boolean = false
-): Correlations => {
-	const corrs: Correlations = {};
-
-	for (const fA of fieldsToCheck) {
-		corrs[fA] = {};
-		const vA = data.map((d) => d[fA]);
-		const tA = inferType(vA);
-		for (const fB of fieldsToCheck) {
-			if (fA === fB) continue;
-			const vB = data.map((d) => d[fB]);
-			const tB = inferType(vB);
-
-			if (tA === "number" && tB === "number") {
-				if (corrs[fB]?.[fA]) continue;
-				const [oA, oB] = arrayOverlap(vA, vB);
-				const corr = getPearsonCorrelation(oA, oB);
-				corrs[fA][fB] = corr ? { corr, n: oA.length } : null;
-			} else if (tA === "number" && tB === "string") {
-				const oA = vA.filter((a) => a);
-				const oB = vB
-					.filter((b, i) => vA[i] !== undefined)
-					.map((b) => b ?? 0);
-
-				const uniqueStrs = [...new Set(oB)].filter(
-					(str) => typeof str === "string"
-				);
-				uniqueStrs.forEach((subF) => {
-					const subA = oA;
-					const subB = oB.map((b) => (b === subF ? 1 : 0));
-
-					const corr = getPointBiserialCorrelation(subB, subA);
-					corrs[fA][fB + "." + subF] = corr
-						? { corr, n: subA.length }
-						: null;
-				});
-			} else if (tA === "number" && tB === "object") {
-				const oA = vA.filter((a) => a);
-				const oB = (vB as string[][]).filter(
-					(b, i) => vA[i] !== undefined
-				);
-
-				const uniqueStrs = [...new Set(oB.flat())].filter(
-					(str) => typeof str === "string"
-				);
-				uniqueStrs.forEach((subF) => {
-					const subA = oA;
-					const subB = oB.map((b) => (b && b.includes(subF) ? 1 : 0));
-					const corr = getPointBiserialCorrelation(subB, subA);
-					corrs[fA][fB + "." + subF] = corr
-						? { corr, n: subA.length }
-						: null;
-				});
-			} else if (tA === "string" && tB === "string") {
-				corrs[fA][fB] = null;
-			} else if (tA === "string" && tB === "number") {
-			} else if (tA === "string" && tB === "object") {
-				corrs[fA][fB] = null;
-			} else if (tA === "object" && tB === "object") {
-				corrs[fA][fB] = null;
-			} else if (tA === "object" && tB === "number") {
-			} else if (tA === "object" && tB === "string") {
-				corrs[fA][fB] = null;
-			}
-		}
-	}
-	if (debugMode) {
-		console.log({ corrs });
-	}
 	return corrs;
 };

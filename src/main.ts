@@ -65,6 +65,7 @@ export default class DataAnalysisPlugin extends Plugin {
 				this.index.corrs = buildAllCorrelations(
 					this.index.data,
 					this.settings.fieldsToCheck,
+					this.settings.fieldsToIgnoreForCorrs,
 					true
 				);
 			});
@@ -110,7 +111,9 @@ export default class DataAnalysisPlugin extends Plugin {
 			callback: async () => {
 				const corrs = buildAllCorrelations(
 					this.index.data,
-					this.settings.fieldsToCheck
+					this.settings.fieldsToCheck,
+					this.settings.fieldsToIgnoreForCorrs,
+					true
 				);
 				// TODO: don't we want to set the index.corrs to the value here?
 				console.log(corrs);

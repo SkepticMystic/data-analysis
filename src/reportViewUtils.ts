@@ -37,6 +37,19 @@ export const buildReportCorrs = (
 	return corrsToShow;
 };
 
+export const buildDropdownOptionsFromReportCorrs = (printableCorrs: PrintableCorrelation[]): string[] => {
+	const fieldOptions = new Set<string>();
+	printableCorrs.forEach((corr: PrintableCorrelation) => {
+		fieldOptions.add(corr.fieldA);
+		fieldOptions.add(corr.fieldB);
+	})
+	const results = Array.from(fieldOptions);
+	results.sort(function (a, b) {
+		return a.localeCompare(b);
+	});
+	return results;
+};
+
 export const top3PositiveCorrs = (
 	correlations: PrintableCorrelation[],
 	sorted: boolean = true

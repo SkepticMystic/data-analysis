@@ -14,13 +14,15 @@
 
 <div class="component">
 	<h1>Correlations Report</h1>
-	<select bind:value={view.selectedField} on:change={view.calculateReport}>
-		{#each view.fieldOptions as field}
-			<option value={field}>
-				{field}
-			</option>
-		{/each}
-	</select>
+	{#key view.fieldOptions}
+		<select bind:value={view.selectedField} on:change={view.calculateReport}>
+			{#each view.fieldOptions as field}
+				<option value={field}>
+					{field}
+				</option>
+			{/each}
+		</select>
+	{/key}
 
 	{#key view.selectedField}
 		<h3>
