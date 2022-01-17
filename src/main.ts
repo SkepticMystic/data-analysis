@@ -358,6 +358,8 @@ export default class DataAnalysisPlugin extends Plugin {
 		return xs.map((x) => x ?? (type === "number" ? 0 : "N/A"));
 	}
 
+	// Test comment
+
 	async createJSDF() {
 		const { settings } = this;
 		const {
