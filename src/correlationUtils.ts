@@ -119,14 +119,11 @@ export const buildAllPairs = (
 	sortedSkipPairs: string[][],
 	sorted: boolean = false
 ): string[][] => {
-	if (!sorted) {
-		items.sort(function (a, b) {
-			return a.localeCompare(b);
-		});
-	}
-	const stringifiedSortedSkipPairs = sortedSkipPairs.map((value: string[]) => {
-		return value.toString();
-	})
+	if (!sorted) items.sort((a, b) => a.localeCompare(b));
+
+	const stringifiedSortedSkipPairs = sortedSkipPairs.map((value) =>
+		value.toString()
+	);
 
 	let results = [];
 
@@ -135,7 +132,6 @@ export const buildAllPairs = (
 		for (
 			// Skip the diagonal
 			let innerIndex = outerIndex + 1;
-			// REVIEW: Can't we make this `innerIndex < outerIndex`, to avoid the duplicates in the first place? But then the `results` array won't be square
 			innerIndex < items.length;
 			innerIndex++
 		) {
@@ -166,16 +162,12 @@ export const buildAllCorrelations = (
 	debugMode: boolean = false
 ): Correlations => {
 	// Alphabetize fieldsToCheck list. This makes it easier to keep track of the correlation pairs.
-	fieldsToCheck.sort(function (a, b) {
-		return a.localeCompare(b);
-	});
+	fieldsToCheck.sort((a, b) => a.localeCompare(b));
 
 	// Alphabetize skip pairs. This allows us to easily remove pairs from the future correlation pair list.
 	const alphabetizedSkipPairs: string[][] = [];
 	for (const skipPair of pairsToSkip) {
-		skipPair.sort(function (a, b) {
-			return a.localeCompare(b);
-		});
+		skipPair.sort((a, b) => a.localeCompare(b));
 		alphabetizedSkipPairs.push(skipPair);
 	}
 
@@ -186,18 +178,14 @@ export const buildAllCorrelations = (
 	let pairs = buildAllPairs(fieldsToCheck, alphabetizedSkipPairs, true);
 
 	for (const pair of pairs) {
-		const fieldA = pair[0];
-		const fieldB = pair[1];
+		const [fieldA, fieldB] = pair;
 		const fieldAData = dataByField[fieldA];
 		const fieldBData = dataByField[fieldB];
 
 		buildCorrelation(fieldA, fieldB, fieldAData, fieldBData, corrs);
 	}
 
-	if (debugMode) {
-		console.log({ corrs });
-	}
-
+	if (debugMode) console.log({ corrs });
 	return corrs;
 };
 
@@ -275,9 +263,7 @@ export const buildCorrelation = (
 		return;
 	}
 
-	if (!corrs[fieldA]) {
-		corrs[fieldA] = {};
-	}
+	if (!corrs[fieldA]) corrs[fieldA] = {};
 
 	const fieldAType = inferType(fieldAData);
 	const fieldBType = inferType(fieldBData);

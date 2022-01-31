@@ -2,7 +2,9 @@ import { PrintableCorrelation, Correlations } from "./interfaces";
 
 export const ALL_FIELDS = "All Fields";
 
-export const buildPrintableCorrs = (corrs: Correlations): PrintableCorrelation[] => {
+export const buildPrintableCorrs = (
+	corrs: Correlations
+): PrintableCorrelation[] => {
 	if (corrs === undefined) return [];
 	const fields = Object.keys(corrs);
 	return fields
@@ -12,8 +14,8 @@ export const buildPrintableCorrs = (corrs: Correlations): PrintableCorrelation[]
 				return { fieldA, fieldB, info: corrs[fieldA][fieldB] };
 			});
 		})
-		.flat()
-}
+		.flat();
+};
 
 export const getReportCorrs = (
 	printableCorrs: PrintableCorrelation[],
@@ -23,11 +25,11 @@ export const getReportCorrs = (
 ): PrintableCorrelation[] => {
 	const corrsToShow = printableCorrs
 		.filter((item) => {
-			const { info } = item;
+			const { info, fieldA, fieldB } = item;
 			const fieldSelected =
 				selectedField == ALL_FIELDS ||
-				item.fieldA == selectedField ||
-				item.fieldB == selectedField;
+				fieldA == selectedField ||
+				fieldB == selectedField;
 			return (
 				info &&
 				fieldSelected &&
@@ -41,26 +43,23 @@ export const getReportCorrs = (
 	return corrsToShow;
 };
 
-export const buildDropdownOptionsFromCorrs = (printableCorrs: PrintableCorrelation[]): string[] => {
+export const buildDropdownOptionsFromCorrs = (
+	printableCorrs: PrintableCorrelation[]
+): string[] => {
 	const fieldOptions = new Set<string>();
 	printableCorrs.forEach((corr: PrintableCorrelation) => {
 		fieldOptions.add(corr.fieldA);
 		fieldOptions.add(corr.fieldB);
-	})
-	const results = Array.from(fieldOptions);
-	results.sort(function (a, b) {
-		return a.localeCompare(b);
 	});
-	return results;
+	const results = Array.from(fieldOptions);
+	return results.sort((a, b) => a.localeCompare(b));
 };
 
 export const top3PositiveCorrs = (
 	correlations: PrintableCorrelation[],
 	sorted: boolean = true
 ): PrintableCorrelation[] => {
-	if (!sorted) {
-		correlations.sort((a, b) => b.info.corr - a.info.corr);
-	}
+	if (!sorted) correlations.sort((a, b) => b.info.corr - a.info.corr);
 	return correlations.slice(0, 3);
 };
 
@@ -68,9 +67,7 @@ export const top3NegativeCorrs = (
 	correlations: PrintableCorrelation[],
 	sorted: boolean = true
 ): PrintableCorrelation[] => {
-	if (!sorted) {
-		correlations.sort((a, b) => b.info.corr - a.info.corr);
-	}
+	if (!sorted) correlations.sort((a, b) => b.info.corr - a.info.corr);
 	return correlations.slice(-3);
 };
 

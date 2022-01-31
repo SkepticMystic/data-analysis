@@ -5,20 +5,25 @@
 	import Top3 from "./CorrTableTop3.svelte";
 
 	export let view: CorrelationsReportView;
-	const { plugin } = view;
 
 	const getButtonText = (show: boolean) => (show ? "↓" : "↑");
 	const ariaShowText = (show: boolean) =>
 		show ? "Hide section" : "Show section";
+
+	const displaySubfield = (field: string) => field.split(".").last();
 </script>
 
 <div class="component">
 	<h1>Correlations Report</h1>
 	{#key view.fieldOptions}
-		<select bind:value={view.selectedField} on:change={view.calculateReport}>
+		<select
+			class="dropdown"
+			bind:value={view.selectedField}
+			on:change={view.calculateReport}
+		>
 			{#each view.fieldOptions as field}
 				<option value={field}>
-					{field}
+					{displaySubfield(field)}
 				</option>
 			{/each}
 		</select>

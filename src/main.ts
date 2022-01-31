@@ -294,19 +294,19 @@ export default class DataAnalysisPlugin extends Plugin {
 			notice.setMessage("Dataview must be enabled");
 			return;
 		}
+		const { app, settings } = this;
 
-		const { fieldsToCheck, fieldLists } = this.settings;
+		const { fieldsToCheck, fieldLists } = settings;
 		for (const path of fieldLists) {
-			const file = this.app.metadataCache.getFirstLinkpathDest(path, "");
+			const file = app.metadataCache.getFirstLinkpathDest(path, "");
 			if (!file) continue;
 
-			const content = await this.app.vault.cachedRead(file);
-			const lines = content.split("\n");
-			lines.forEach((line) => {
+			const content = await app.vault.cachedRead(file);
+			content.split("\n").forEach((line) => {
 				const field = dropWiki(line);
 				if (!fieldsToCheck.includes(field)) fieldsToCheck.push(field);
 			});
-			this.settings.fieldsToCheck = fieldsToCheck;
+			settings.fieldsToCheck = fieldsToCheck;
 			await this.saveSettings();
 		}
 
