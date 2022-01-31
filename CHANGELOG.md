@@ -1,4 +1,11 @@
 ## Changelog
+### [0.0.25](https://github.com/SkepticMystic/data-analysis/compare/0.0.24...0.0.25) (2022-01-31)
+
+
+### Fixes
+
+* **Correlation Report:** :bug: Render dropdown from full list of potential factors, not whatever's currently in the report ([0a50a44](https://github.com/SkepticMystic/data-analysis/commit/0a50a4482f29bae36eb5fe44797412615cd255ef))
+
 ### [0.0.24](https://github.com/SkepticMystic/data-analysis/compare/0.0.22...0.0.24) (2022-01-17)
 
 
