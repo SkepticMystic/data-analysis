@@ -7,8 +7,9 @@ import { PrintableCorrelation } from "./interfaces";
 import type DataAnalysisPlugin from "./main";
 import {
 	ALL_FIELDS,
-	buildDropdownOptionsFromReportCorrs,
-	buildReportCorrs,
+	buildDropdownOptionsFromCorrs,
+	buildPrintableCorrs,
+	getReportCorrs,
 	top3NegativeCorrs,
 	top3PositiveCorrs,
 } from "./reportViewUtils";
@@ -71,15 +72,16 @@ export default class CorrelationView extends ItemView {
 	icon = addFeatherIcon("trending-up") as string;
 
 	calculateReport = () => {
-		this.corrsToShow = buildReportCorrs(
-			this.plugin.index.corrs,
+		var dropdownCorrs = buildPrintableCorrs(this.plugin.index.corrs)
+		this.corrsToShow = getReportCorrs(
+			dropdownCorrs,
 			this.selectedField,
 			this.max,
 			this.min
 		);
 		this.topPos3 = top3PositiveCorrs(this.corrsToShow);
 		this.topNeg3 = top3NegativeCorrs(this.corrsToShow);
-		this.fieldOptions = [ALL_FIELDS, ...buildDropdownOptionsFromReportCorrs(this.corrsToShow)]
+		this.fieldOptions = [ALL_FIELDS, ...buildDropdownOptionsFromCorrs(dropdownCorrs)]
 	};
 
 	async onOpen(): Promise<void> {

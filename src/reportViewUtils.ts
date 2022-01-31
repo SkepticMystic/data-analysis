@@ -2,15 +2,10 @@ import { PrintableCorrelation, Correlations } from "./interfaces";
 
 export const ALL_FIELDS = "All Fields";
 
-export const buildReportCorrs = (
-	corrs: Correlations,
-	selectedField: string,
-	max: number,
-	min: number
-): PrintableCorrelation[] => {
+export const buildPrintableCorrs = (corrs: Correlations): PrintableCorrelation[] => {
 	if (corrs === undefined) return [];
 	const fields = Object.keys(corrs);
-	const corrsToShow = fields
+	return fields
 		.map((fieldA) => {
 			const correlatedFields = Object.keys(corrs[fieldA]);
 			return correlatedFields.map((fieldB) => {
@@ -18,6 +13,15 @@ export const buildReportCorrs = (
 			});
 		})
 		.flat()
+}
+
+export const getReportCorrs = (
+	printableCorrs: PrintableCorrelation[],
+	selectedField: string,
+	max: number,
+	min: number
+): PrintableCorrelation[] => {
+	const corrsToShow = printableCorrs
 		.filter((item) => {
 			const { info } = item;
 			const fieldSelected =
@@ -37,7 +41,7 @@ export const buildReportCorrs = (
 	return corrsToShow;
 };
 
-export const buildDropdownOptionsFromReportCorrs = (printableCorrs: PrintableCorrelation[]): string[] => {
+export const buildDropdownOptionsFromCorrs = (printableCorrs: PrintableCorrelation[]): string[] => {
 	const fieldOptions = new Set<string>();
 	printableCorrs.forEach((corr: PrintableCorrelation) => {
 		fieldOptions.add(corr.fieldA);
