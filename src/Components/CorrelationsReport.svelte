@@ -27,6 +27,7 @@
 				</option>
 			{/each}
 		</select>
+		<button on:click={() => view.calculateReport()}>Done</button>
 	{/key}
 
 	{#key view.selectedField}
