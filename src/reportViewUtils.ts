@@ -6,11 +6,9 @@ export const buildPrintableCorrs = (
 	corrs: Correlations
 ): PrintableCorrelation[] => {
 	if (corrs === undefined) return [];
-	const fields = Object.keys(corrs);
-	return fields
+	return Object.keys(corrs)
 		.map((fieldA) => {
-			const correlatedFields = Object.keys(corrs[fieldA]);
-			return correlatedFields.map((fieldB) => {
+			return Object.keys(corrs[fieldA]).map((fieldB) => {
 				return { fieldA, fieldB, info: corrs[fieldA][fieldB] };
 			});
 		})
@@ -22,14 +20,14 @@ export const getReportCorrs = (
 	selectedField: string,
 	max: number,
 	min: number
-): PrintableCorrelation[] => {
-	const corrsToShow = printableCorrs
+): PrintableCorrelation[] =>
+	printableCorrs
 		.filter((item) => {
 			const { info, fieldA, fieldB } = item;
 			const fieldSelected =
-				selectedField == ALL_FIELDS ||
-				fieldA == selectedField ||
-				fieldB == selectedField;
+				selectedField === ALL_FIELDS ||
+				selectedField === fieldA ||
+				selectedField === fieldB;
 			return (
 				info &&
 				fieldSelected &&
@@ -40,9 +38,6 @@ export const getReportCorrs = (
 		})
 		.sort((a, b) => b.info.corr - a.info.corr);
 
-	return corrsToShow;
-};
-
 export const buildDropdownOptionsFromCorrs = (
 	printableCorrs: PrintableCorrelation[]
 ): string[] => {
@@ -51,8 +46,7 @@ export const buildDropdownOptionsFromCorrs = (
 		fieldOptions.add(corr.fieldA);
 		fieldOptions.add(corr.fieldB);
 	});
-	const results = Array.from(fieldOptions);
-	return results.sort((a, b) => a.localeCompare(b));
+	return Array.from(fieldOptions).sort((a, b) => a.localeCompare(b));
 };
 
 export const top3PositiveCorrs = (
