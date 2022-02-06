@@ -136,3 +136,13 @@ export function menuForChartNStatsModal(
 
 export const dropWiki = (str: string) =>
 	str.startsWith("[[") && str.endsWith("]]") ? str.slice(2, -2) : str;
+
+export function isNested(
+	unwrappedFields: { [sup: string]: string[] },
+	field: string
+) {
+	for (const sup in unwrappedFields) {
+		if (unwrappedFields[sup].includes(field)) return sup;
+	}
+	return false;
+}

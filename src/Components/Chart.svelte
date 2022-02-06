@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { DateTime } from "obsidian-dataview";
-	import { getPearsonCorrelation, isQuant } from "src/analyses";
+	import {
+		getPearsonCorrelation,
+		getPointBiserialCorrelation,
+		isBinary,
+		isQuant,
+	} from "src/analyses";
 	import { ChartModal } from "src/ChartModal";
+	import { isNested } from "src/utils";
+	import Bar from "svelte-chartjs/src/Bar.svelte";
 	import Scatter from "svelte-chartjs/src/Scatter.svelte";
 	import ChartOptions from "./ChartOptions.svelte";
 
@@ -9,7 +16,7 @@
 	let { f1, f2 } = modal;
 
 	const { app, plugin } = modal;
-	const { index, settings } = plugin;
+	const { index, settings, unwrappedFields } = plugin;
 	const { fieldsToCheck } = settings;
 
 	let allFields = fieldsToCheck;
@@ -48,11 +55,26 @@
 			  })
 			: index.data;
 
+		const f1Nested = isNested(unwrappedFields, f1);
+		const f2Nested = isNested(unwrappedFields, f2);
+		console.log({ f1Nested, f2Nested });
+
 		const innerData = fileRange
 			.map((page) => {
+				const x = f1Nested
+					? page[f1Nested]
+							?.map((v: string | { path: string }) => v.path ?? v)
+							.includes(f1)
+					: page[f1];
+				const y = f2Nested
+					? page[f2Nested]
+							?.map((v: string | { path: string }) => v.path ?? v)
+							.includes(f2)
+					: page[f2];
+
 				return {
-					x: page[f1] as number,
-					y: page[f2] as number,
+					x,
+					y,
 					name: page.file.name,
 				};
 			})
@@ -62,25 +84,44 @@
 		return innerData;
 	}
 
-	function refreshCorrelation(f1: string, f2: string, innerData: Datum2d[]) {
+	function refreshCorrelation(
+		f1: string,
+		f2: string,
+		innerData: Datum2d[]
+	): { value: number; type: "Pearson" | "Point Biserial" } {
 		const xs = innerData.map((p) => p.x);
 		const ys = innerData.map((p) => p.y);
+		console.log({ innerData });
 
 		if (isValidSelection(f1, f2)) {
-			const xValid = isQuant(xs);
-			const yValid = isQuant(ys);
-			if (!xValid && !yValid) {
-				errorMessage = "Both fields have non-numeric values.";
-				return null;
-			} else if (!xValid) {
-				errorMessage = "First field has non-numeric values.";
-				return null;
-			} else if (!yValid) {
-				errorMessage = "Second field has non-numeric values.";
+			const [xQuant, yQuant] = [isQuant(xs), isQuant(ys)];
+			const [xBinary, yBinary] = [isBinary(xs), isBinary(ys)];
+
+			console.log({ xQuant, yQuant, xBinary, yBinary });
+
+			if (xQuant && yQuant) {
+				errorMessage = "";
+				return {
+					value: getPearsonCorrelation(xs, ys, true),
+					type: "Pearson",
+				};
+			} else if (xQuant && yBinary) {
+				errorMessage = "";
+				return {
+					value: getPointBiserialCorrelation(ys, xs),
+					type: "Point Biserial",
+				};
+			} else if (xBinary && yQuant) {
+				errorMessage = "";
+				return {
+					value: getPointBiserialCorrelation(xs, ys),
+					type: "Point Biserial",
+				};
+			} else {
+				errorMessage =
+					"Either both fields must be numeric, or one must be numeric and the other binary.";
 				return null;
 			}
-			errorMessage = "";
-			return getPearsonCorrelation(xs, ys, true);
 		}
 		return null;
 	}
@@ -113,18 +154,10 @@
 					},
 					type: "linear",
 					position: "bottom",
-					scaleLabel: {
-						labelString: "Frequency",
-						display: true,
-					},
 				},
 
 				yAxes: {
 					type: "linear",
-					scaleLabel: {
-						labelString: "Voltage",
-						display: true,
-					},
 					title: {
 						display: isValidSelection(f1, f2),
 						text: f2 ?? "",
@@ -167,8 +200,12 @@
 </div>
 
 <ChartOptions bind:colour bind:startDate bind:endDate bind:dnOnly />
-<Scatter {data} options={chartOptions} />
 
+{#if !correlation || correlation.type === "Pearson"}
+	<Scatter {data} options={chartOptions} />
+{:else}
+	<Bar {data} options={chartOptions} />
+{/if}
 <div class="measures">
 	{#if errorMessage != ""}
 		<span>Error: {errorMessage}</span>
@@ -179,7 +216,7 @@
 		</span>
 		<span>
 			<span class="measure-name">Correlation:</span>
-			<span class="measure-value">{correlation?.toFixed(4)}</span>
+			<span class="measure-value">{correlation?.value.toFixed(4)}</span>
 		</span>
 	{:else}
 		<span>Select 2 fields</span>
