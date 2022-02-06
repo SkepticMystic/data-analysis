@@ -1,4 +1,12 @@
 ## Changelog
+### [0.0.27](https://github.com/SkepticMystic/data-analysis/compare/0.0.26...0.0.27) (2022-02-06)
+
+
+### Fixes
+
+* **ChartModal:** :bug: Get Chart working with nested fields! ([ceb89b5](https://github.com/SkepticMystic/data-analysis/commit/ceb89b5dd0fa750811571165b2b91a6873776ce2))
+* **StatsModal:** :bug: Get stats modal to work with nested fields ([8444414](https://github.com/SkepticMystic/data-analysis/commit/84444148d2bf9129e432f93f76250b8a9ffc47b1))
+
 ### [0.0.26](https://github.com/SkepticMystic/data-analysis/compare/0.0.25...0.0.26) (2022-02-05)
 
 
