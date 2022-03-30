@@ -1,6 +1,7 @@
 import { getPearsonCorrelation, getPointBiserialCorrelation } from "./analyses";
 import { Correlations, DataType } from "./interfaces";
 import { DateTime } from "luxon";
+import DataAnalysisPlugin from "./main";
 
 export function arrayOverlap<T>(A: T[], B: T[]): [T[], T[]] {
 	const iA: number[] = [];
@@ -99,7 +100,6 @@ export const processPages = (
 			}
 		});
 	});
-
 	return {
 		pages: pages.filter((page) => page.hasFieldsOfInterest),
 		dates: dates,
@@ -145,17 +145,51 @@ export const buildAllPairs = (
 };
 
 export const buildAllDataByFieldsToCheck = (
+	plugin: DataAnalysisPlugin,
 	data: { [field: string]: DataType }[],
 	fieldsToCheck: string[]
 ): { [field: string]: DataType[] } => {
 	const dataByField: { [field: string]: DataType[] } = {};
-	for (const field of fieldsToCheck) {
-		dataByField[field] = data.map((page) => page[field]);
-	}
+	const { unwrappedFields } = plugin;
+
+	data.forEach((page, i) => {
+		Object.keys(unwrappedFields).forEach((superKey) => {
+			if (
+				unwrappedFields[superKey]?.length &&
+				page[superKey] !== undefined
+			) {
+				try {
+					const valsOnPage = [...page[superKey]]
+						.flat()
+						.map((val) => val.path ?? val);
+
+					unwrappedFields[superKey].forEach((possibleVal) => {
+						if (dataByField[possibleVal] === undefined)
+							dataByField[possibleVal] = new Array(
+								data.length
+							).fill(undefined);
+						dataByField[possibleVal][i] =
+							valsOnPage.includes(possibleVal);
+					});
+				} catch (e) {
+					console.log(i);
+				}
+			}
+		});
+		for (const field of fieldsToCheck) {
+			if (page[field] !== undefined) {
+				if (dataByField[field] === undefined)
+					dataByField[field] = new Array(data.length).fill(undefined);
+				dataByField[field][i] = page[field];
+			}
+		}
+	});
+
 	return dataByField;
 };
 
 export const buildAllCorrelations = (
+	plugin: DataAnalysisPlugin,
 	data: { [field: string]: DataType }[],
 	fieldsToCheck: string[],
 	pairsToSkip: string[][],
@@ -165,14 +199,18 @@ export const buildAllCorrelations = (
 	fieldsToCheck.sort((a, b) => a.localeCompare(b));
 
 	// Alphabetize skip pairs. This allows us to easily remove pairs from the future correlation pair list.
-	const alphabetizedSkipPairs: string[][] = [];
-	for (const skipPair of pairsToSkip) {
-		skipPair.sort((a, b) => a.localeCompare(b));
-		alphabetizedSkipPairs.push(skipPair);
-	}
+	const alphabetizedSkipPairs = pairsToSkip.map(
+		(pair) => pair.sort((a, b) => a.localeCompare(b)) as [string, string]
+	);
 
 	const corrs: Correlations = {};
-	const dataByField = buildAllDataByFieldsToCheck(data, fieldsToCheck);
+
+	const dataByField = buildAllDataByFieldsToCheck(
+		plugin,
+		data,
+		fieldsToCheck
+	);
+	console.log({ dataByField });
 
 	// Build all correlation pairs. Filter out any of the skip pairs.
 	let pairs = buildAllPairs(fieldsToCheck, alphabetizedSkipPairs, true);
@@ -181,6 +219,9 @@ export const buildAllCorrelations = (
 		const [fieldA, fieldB] = pair;
 		const fieldAData = dataByField[fieldA];
 		const fieldBData = dataByField[fieldB];
+		if (!fieldAData || !fieldBData) {
+			continue;
+		}
 
 		buildCorrelation(fieldA, fieldB, fieldAData, fieldBData, corrs);
 	}
@@ -227,9 +268,7 @@ const buildCorrelationNumberAndString = (
 	numberFieldData: DataType[],
 	corrs: Correlations
 ): Correlations => {
-	if (!corrs[numberField]) {
-		corrs[numberField] = {};
-	}
+	if (!corrs[numberField]) corrs[numberField] = {};
 
 	const oA = numberFieldData.filter((a: any) => a);
 	const oB = stringFieldData
@@ -259,9 +298,7 @@ export const buildCorrelation = (
 	fieldBData: DataType[],
 	corrs: Correlations
 ): Correlations => {
-	if (fieldA == fieldB) {
-		return;
-	}
+	if (fieldA === fieldB) return;
 
 	if (!corrs[fieldA]) corrs[fieldA] = {};
 

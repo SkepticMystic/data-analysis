@@ -6,15 +6,29 @@
 	export let modal: StatsModal;
 
 	const { app, plugin } = modal;
-	const { index, settings } = plugin;
+	const { index, settings, unwrappedFields } = plugin;
 	const { fieldsToCheck } = settings;
 
 	let { f1 } = modal;
 
-	const updateData = (field: string) =>
-		index.data
+	const updateData = (field: string) => {
+		for (const superKey in unwrappedFields) {
+			if (unwrappedFields[superKey].includes(field)) {
+				return index.data.map((page) => {
+					console.log(page[superKey], superKey);
+					const pageVals = page[superKey]?.map(
+						(subKey: string | number) => subKey.path ?? subKey
+					);
+					console.log({ pageVals });
+					return pageVals?.includes(field) ? 1 : 0;
+				});
+			}
+		}
+
+		return index.data
 			.map((d) => d[field])
 			.filter((d) => d !== undefined && d !== null);
+	};
 
 	$: data = updateData(f1);
 	$: n = data.length;
@@ -30,6 +44,7 @@
 		["Mode", mode],
 		std ? ["Std Dev.", roundNumber(std)] : null,
 	];
+	$: console.log(data, stats);
 </script>
 
 <datalist id="fields">

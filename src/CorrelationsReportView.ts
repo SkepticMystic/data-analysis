@@ -72,7 +72,7 @@ export default class CorrelationView extends ItemView {
 	icon = addFeatherIcon("trending-up") as string;
 
 	calculateReport = () => {
-		var dropdownCorrs = buildPrintableCorrs(this.plugin.index.corrs)
+		var dropdownCorrs = buildPrintableCorrs(this.plugin.index.corrs);
 		this.corrsToShow = getReportCorrs(
 			dropdownCorrs,
 			this.selectedField,
@@ -81,7 +81,10 @@ export default class CorrelationView extends ItemView {
 		);
 		this.topPos3 = top3PositiveCorrs(this.corrsToShow);
 		this.topNeg3 = top3NegativeCorrs(this.corrsToShow);
-		this.fieldOptions = [ALL_FIELDS, ...buildDropdownOptionsFromCorrs(dropdownCorrs)]
+		this.fieldOptions = [
+			ALL_FIELDS,
+			...buildDropdownOptionsFromCorrs(dropdownCorrs),
+		];
 	};
 
 	async onOpen(): Promise<void> {
@@ -106,6 +109,7 @@ export default class CorrelationView extends ItemView {
 				but.onclick = async () => {
 					await plugin.refreshIndex();
 					plugin.index.corrs = buildAllCorrelations(
+						plugin,
 						plugin.index.data,
 						plugin.settings.fieldsToCheck,
 						plugin.settings.fieldsToIgnoreForCorrs

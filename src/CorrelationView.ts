@@ -50,6 +50,7 @@ export default class CorrelationView extends ItemView {
 				but.onclick = async () => {
 					await plugin.refreshIndex();
 					plugin.index.corrs = buildAllCorrelations(
+						plugin,
 						plugin.index.data,
 						plugin.settings.fieldsToCheck,
 						plugin.settings.fieldsToIgnoreForCorrs

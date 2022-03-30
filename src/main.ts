@@ -63,6 +63,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			this.app.workspace.onLayoutReady(async () => {
 				await this.refreshIndex();
 				this.index.corrs = buildAllCorrelations(
+					this,
 					this.index.data,
 					this.settings.fieldsToCheck,
 					this.settings.fieldsToIgnoreForCorrs,
@@ -110,6 +111,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			name: "Build Correlations",
 			callback: async () => {
 				const corrs = buildAllCorrelations(
+					this,
 					this.index.data,
 					this.settings.fieldsToCheck,
 					this.settings.fieldsToIgnoreForCorrs,
@@ -217,7 +219,7 @@ export default class DataAnalysisPlugin extends Plugin {
 	}
 
 	async getSuperchargedFields(): Promise<SuperchargedField[]> {
-		const { app, settings } = this;
+		const { app } = this;
 
 		const presetFields: PresetField[] =
 			app.plugins.plugins["supercharged-links-obsidian"]?.settings
@@ -252,7 +254,6 @@ export default class DataAnalysisPlugin extends Plugin {
 		const { fieldsToCheck } = this.settings;
 
 		const scFields = await this.getSuperchargedFields();
-
 		if (scFields) {
 			for (const scField of scFields) {
 				const { name, values } = scField;
@@ -262,29 +263,28 @@ export default class DataAnalysisPlugin extends Plugin {
 					unwrappedFields[name].push(dropWiki(value));
 				}
 			}
-		} else {
-			for (const field of fieldsToCheck) {
-				unwrappedFields[field] = [];
-				data.forEach((d) => {
-					const cell = d[field];
+		}
+		for (const field of fieldsToCheck) {
+			unwrappedFields[field] = [];
+			data.forEach((d) => {
+				const cell = d[field];
 
-					// BUG: Don't do this for _every_ string
-					if (typeof cell === "string") {
-						d[cell] = true;
-						if (!unwrappedFields[field].includes(cell))
-							unwrappedFields[field].push(cell);
-					} else if (
-						cell?.every &&
-						cell.every((x: any) => typeof x === "string")
-					) {
-						cell.forEach((str: string) => {
-							d[str] = true;
-							if (!unwrappedFields[field].includes(str))
-								unwrappedFields[field].push(str);
-						});
-					}
-				});
-			}
+				// BUG: Don't do this for _every_ string
+				if (typeof cell === "string") {
+					d[cell] = true;
+					if (!unwrappedFields[field].includes(cell))
+						unwrappedFields[field].push(cell);
+				} else if (
+					cell?.every &&
+					cell.every((x: any) => typeof x === "string")
+				) {
+					cell.forEach((str: string) => {
+						d[str] = true;
+						if (!unwrappedFields[field].includes(str))
+							unwrappedFields[field].push(str);
+					});
+				}
+			});
 		}
 	}
 	async refreshIndex() {
@@ -304,7 +304,9 @@ export default class DataAnalysisPlugin extends Plugin {
 			const content = await app.vault.cachedRead(file);
 			content.split("\n").forEach((line) => {
 				const field = dropWiki(line);
-				if (!fieldsToCheck.includes(field)) fieldsToCheck.push(field);
+				if (!fieldsToCheck.includes(field)) {
+					fieldsToCheck.push(field);
+				}
 			});
 			settings.fieldsToCheck = fieldsToCheck;
 			await this.saveSettings();
