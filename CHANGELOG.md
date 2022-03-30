@@ -1,11 +1,4 @@
 ## Changelog
-### [0.0.26](https://github.com/SkepticMystic/data-analysis/compare/0.0.25...0.0.26) (2022-02-05)
-
-
-### Features
-
-* **Correlation Report:** :sparkles: Add button confirming selection of dropdown in case report doesn't refresh ([f806ed3](https://github.com/SkepticMystic/data-analysis/commit/f806ed3ae026b913f6012cf1a38319bc7e6194e1))
-
 ### [0.0.25](https://github.com/SkepticMystic/data-analysis/compare/0.0.24...0.0.25) (2022-01-31)
 
 
