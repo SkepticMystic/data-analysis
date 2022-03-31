@@ -44,12 +44,12 @@ export default class DataAnalysisPlugin extends Plugin {
 		minDate: DateTime;
 		maxDate: DateTime;
 	} = {
-		data: undefined,
-		dataMap: undefined,
-		corrs: undefined,
-		minDate: undefined,
-		maxDate: undefined,
-	};
+			data: undefined,
+			dataMap: undefined,
+			corrs: undefined,
+			minDate: undefined,
+			maxDate: undefined,
+		};
 
 	unwrappedFields: { [field: string]: string[] } = {};
 
@@ -240,7 +240,7 @@ export default class DataAnalysisPlugin extends Plugin {
 					const content = await this.app.vault.cachedRead(file);
 					const lines = content.split("\n");
 
-					lines.forEach((line) => newValues.push(line));
+					lines.forEach((line) => newValues.push(dropWiki(line)));
 				}
 
 				return { name, values: newValues };
@@ -254,8 +254,10 @@ export default class DataAnalysisPlugin extends Plugin {
 		const { fieldsToCheck } = this.settings;
 
 		const scFields = await this.getSuperchargedFields();
+
 		if (scFields) {
 			for (const scField of scFields) {
+				if (!scField) continue;
 				const { name, values } = scField;
 				unwrappedFields[name] = [];
 				for (const value of values) {
@@ -269,7 +271,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			data.forEach((d) => {
 				const cell = d[field];
 
-				// BUG: Don't do this for _every_ string
+				// FIX: Don't do this for _every_ string
 				if (typeof cell === "string") {
 					d[cell] = true;
 					if (!unwrappedFields[field].includes(cell))
@@ -312,7 +314,7 @@ export default class DataAnalysisPlugin extends Plugin {
 			await this.saveSettings();
 		}
 
-		let pages: { [field: string]: any }[] = dvApi.pages().values;
+		const pages: { [field: string]: any }[] = dvApi.pages().values;
 		const result = processPages(pages, fieldsToCheck);
 
 		await this.unwrapStrLists(result.pages);

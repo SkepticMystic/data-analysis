@@ -33,29 +33,9 @@ export function getPearsonCorrelation(
 	}
 
 	const corr =
-		(n * sum_xy - sum_x * sum_y) /
-		Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y));
-
-	// const n = xs.length;
-	// const x_bar = getMean(xs);
-	// const y_bar = getMean(ys);
-
-	// let sum_x_minus_mu = 0;
-	// let sum_y_minus_mu = 0;
-
-	// for (let i = 0; i < n; i++) {
-	// 	const x = xs[i];
-	// 	const y = ys[i];
-
-	// 	sum_x_minus_mu += x - x_bar;
-	// 	sum_y_minus_mu += y - y_bar;
-	// }
-
-	// const corr =
-	// 	(sum_x_minus_mu * sum_y_minus_mu) /
-	// 	Math.sqrt(
-	// 		sum_x_minus_mu * sum_x_minus_mu * sum_y_minus_mu * sum_y_minus_mu
-	// 	);
+		(n * sum_xy - sum_x * sum_y)
+	// /
+	// Math.sqrt((n * sum_xx - sum_x * sum_x) * (n * sum_yy - sum_y * sum_y));
 
 	return corr;
 }

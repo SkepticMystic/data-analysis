@@ -125,7 +125,7 @@ export const buildAllPairs = (
 		value.toString()
 	);
 
-	let results = [];
+	const results = [];
 
 	for (let outerIndex = 0; outerIndex < items.length; outerIndex++) {
 		let first = items[outerIndex];
@@ -141,6 +141,7 @@ export const buildAllPairs = (
 			}
 		}
 	}
+
 	return results;
 };
 
@@ -219,9 +220,7 @@ export const buildAllCorrelations = (
 		const [fieldA, fieldB] = pair;
 		const fieldAData = dataByField[fieldA];
 		const fieldBData = dataByField[fieldB];
-		if (!fieldAData || !fieldBData) {
-			continue;
-		}
+		if (!fieldAData || !fieldBData) continue
 
 		buildCorrelation(fieldA, fieldB, fieldAData, fieldBData, corrs);
 	}
@@ -251,7 +250,7 @@ const buildCorrelationNumberAndObject = (
 	);
 	uniqueStrs.forEach((subF) => {
 		const subA = oA;
-		const subB = oB.map((b) => (b && b.includes(subF) ? 1 : 0));
+		const subB = oB.map((b) => (b && b.includes && b.includes(subF) ? 1 : 0));
 		const corr = getPointBiserialCorrelation(subB, subA);
 		corrs[numberField][objectField + "." + subF] = corr
 			? { corr, n: subA.length }

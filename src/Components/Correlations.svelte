@@ -78,7 +78,7 @@
 		.flat()
 		.filter((item) => {
 			const { info } = item;
-			return info && info.corr !== NaN;
+			return info && !isNaN(info.corr);
 		})
 		.sort((a, b) => b.info.corr - a.info.corr);
 

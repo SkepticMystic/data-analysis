@@ -118,7 +118,7 @@ export function menuForChartNStatsModal(
 			.setTitle("Open Chart Modal")
 			.setIcon(<string>addFeatherIcon("bar-chart-2"))
 			.onClick(() => {
-				new ChartModal(app, plugin, row[0], row[1]).open();
+				new ChartModal(app, plugin, row[0].split('.').last(), row[1].split('.').last()).open();
 			})
 	);
 	if (typeof clickedCell === "string") {
@@ -127,7 +127,7 @@ export function menuForChartNStatsModal(
 				.setTitle("Open Stats Modal")
 				.setIcon(<string>addFeatherIcon("grid"))
 				.onClick(() => {
-					new StatsModal(app, plugin, clickedCell).open();
+					new StatsModal(app, plugin, clickedCell.split('.').last()).open();
 				})
 		);
 	}
