@@ -1,4 +1,13 @@
 ## Changelog
+### [0.0.29](https://github.com/SkepticMystic/data-analysis/compare/0.0.28...0.0.29) (2022-03-31)
+
+
+### Fixes
+
+* Check for NaN properly ([29035a0](https://github.com/SkepticMystic/data-analysis/commit/29035a0cea79f98e99a8660e988dcc8c5976c046))
+* Check that .includes exists ([a375bd3](https://github.com/SkepticMystic/data-analysis/commit/a375bd38d72c55a1572a2c3571d93b053baa17ff))
+* Trim nested fields in righlt-click menu ([f50cc03](https://github.com/SkepticMystic/data-analysis/commit/f50cc0354d4a2f2efe8a0d03f51be554ac678bb8))
+
 ### [0.0.28](https://github.com/SkepticMystic/data-analysis/compare/0.0.27...0.0.28) (2022-03-30)
 
 ### [0.0.26](https://github.com/SkepticMystic/data-analysis/compare/0.0.27...0.0.26) (2022-03-30)
