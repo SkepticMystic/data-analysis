@@ -250,7 +250,7 @@ const buildCorrelationNumberAndObject = (
 	);
 	uniqueStrs.forEach((subF) => {
 		const subA = oA;
-		const subB = oB.map((b) => (b && b.includes(subF) ? 1 : 0));
+		const subB = oB.map((b) => (b && b.includes && b.includes(subF) ? 1 : 0));
 		const corr = getPointBiserialCorrelation(subB, subA);
 		corrs[numberField][objectField + "." + subF] = corr
 			? { corr, n: subA.length }
